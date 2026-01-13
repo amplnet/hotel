@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labyrinth Hotel | Elevator</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+
+    <style>
+        /* [1. 톤앤매너 통일 - 배경 및 기초] */
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body { 
+            background-color: #050505; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; font-family: 'Pretendard', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 커스텀 커서 (도어락과 동일) */
+        .cursor { position: fixed; width: 8px; height: 8px; background: #8B0000; border-radius: 50%; pointer-events: none; z-index: 9999; }
+        .cursor-follower { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(139, 0, 0, 0.5); border-radius: 50%; pointer-events: none; transition: transform 0.1s; z-index: 9998; }
+
+        /* [2. 엘리베이터 패널 디자인] */
+        .elevator-panel {
+            background: linear-gradient(145deg, #111, #050505);
+            padding: 40px 30px; 
+            border-radius: 4px; 
+            border: 1px solid #2a1f10; /* 골드 브라운 테두리 */
+            box-shadow: 0 0 80px rgba(0,0,0,1); 
+            width: 360px;
+            z-index: 100;
+        }
+
+        .panel-header {
+            color: #D4AF37; /* 안티크 골드 */
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 1.4rem; 
+            letter-spacing: 5px; 
+            margin-bottom: 40px;
+            text-align: center; 
+            border-bottom: 1px solid rgba(212, 175, 55, 0.3); 
+            padding-bottom: 15px;
+            text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+        }
+
+        /* 히든 트리거 (IN) */
+        .hidden-trigger {
+            color: inherit; text-decoration: none; cursor: none; outline: none;
+            -webkit-tap-highlight-color: transparent; user-select: none;
+        }
+
+        .floor-row { display: flex; align-items: center; margin-bottom: 25px; }
+
+        /* [3. 버튼 디자인 - 도어락 키패드 스타일] */
+        .btn-elevator {
+            width: 65px; height: 65px; border-radius: 50%;
+            background: radial-gradient(circle, #222, #0a0a0a);
+            border: 1px solid #332211; 
+            color: #555; /* 평소엔 어둡게 */
+            font-family: 'Nanum Myeongjo', serif; 
+            font-size: 1.4rem;
+            cursor: none; outline: none; 
+            transition: all 0.4s ease;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        /* 호버 시 골드 테두리 */
+        .btn-elevator:hover {
+            border-color: #D4AF37;
+            color: #888;
+        }
+
+        /* 활성화 시 레드 글로우 (도어락 접속 포인트 감성) */
+        .btn-elevator.active {
+            color: #fff;
+            background: radial-gradient(circle, #8B0000, #330000);
+            border-color: #FF0000;
+            box-shadow: 0 0 20px rgba(139, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.4);
+            text-shadow: 0 0 10px #fff;
+        }
+
+        .directory-tag { margin-left: 25px; display: flex; flex-direction: column; }
+        .directory-tag .en { 
+            font-family: 'Nanum Myeongjo', serif;
+            font-size: 1rem; font-weight: bold; color: #D4AF37; 
+            letter-spacing: 1px; margin-bottom: 2px;
+        }
+        .directory-tag .ko { 
+            font-size: 0.8rem; color: #777; 
+            font-weight: 300; letter-spacing: -0.5px;
+        }
+
+        /* 비네팅 효과 */
+        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 250px #000; pointer-events: none; z-index: 50; }
+    </style>
+</head>
+<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
+
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <div class="vignette"></div>
+
+    <div class="elevator-panel">
+        <div class="panel-header">
+            LABYR<span class="hidden-trigger" onclick="alert('IN 부분을 확인하자, 엘리베이터가 천천히 움직이기 시작했다. 화면에 checkinwaiting이라는 글자가 나타났다.');">IN</span>TH HOTEL
+        </div>
+
+        <div class="floor-row">
+            <button class="btn-elevator" onclick="handleFloor(this)">7</button>
+            <div class="directory-tag">
+                <span class="en">Guestroom</span>
+                <span class="ko">게스트룸</span>
+            </div>
+        </div>
+
+        <div class="floor-row">
+            <button class="btn-elevator" onclick="handleFloor(this)">6</button>
+            <div class="directory-tag">
+                <span class="en">Executive Lounge</span>
+                <span class="ko">라운지</span>
+            </div>
+        </div>
+
+        <div class="floor-row">
+            <button class="btn-elevator" onclick="handleFloor(this)">5</button>
+            <div class="directory-tag">
+                <span class="en">Family Lounge</span>
+                <span class="ko">패밀리 라운지</span>
+            </div>
+        </div>
+
+        <div class="floor-row">
+            <button class="btn-elevator" onclick="handleFloor(this)">4</button>
+            <div class="directory-tag">
+                <span class="en">Audio Lounge</span>
+                <span class="ko">오디오 라운지</span>
+            </div>
+        </div>
+
+        <div class="floor-row">
+            <button class="btn-elevator" onclick="handleFloor(this)">3</button>
+            <div class="directory-tag">
+                <span class="en">Restaurant</span>
+                <span class="ko">레스토랑</span>
+            </div>
+        </div>
+
+        <div class="floor-row">
+            <button class="btn-elevator" onclick="handleFloor(this)">2</button>
+            <div class="directory-tag">
+                <span class="en">Gallery</span>
+                <span class="ko">갤러리</span>
+            </div>
+        </div>
+
+        <div class="floor-row">
+            <button class="btn-elevator" onclick="handleFloor(this)">G</button>
+            <div class="directory-tag">
+                <span class="en">Ground Floor</span>
+                <span class="ko">지상층</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* [보안 스크립트: 도어락과 동일] */
+        document.onkeydown = function(e) {
+            if(event.keyCode == 123) return false; // F12 차단
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // 검사 차단
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // 소스보기 차단
+        };
+
+        /* [커서 로직] */
+        const cursor = document.querySelector('.cursor');
+        const follower = document.querySelector('.cursor-follower');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            setTimeout(() => {
+                follower.style.left = e.clientX - 16 + 'px';
+                follower.style.top = e.clientY - 16 + 'px';
+            }, 50);
+        });
+
+        /* [엘리베이터 작동 로직] */
+        function handleFloor(btn) {
+            alert('버튼의 색깔이 붉게 변했지만, 아무런 일도 일어나지 않았다');
+            btn.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
