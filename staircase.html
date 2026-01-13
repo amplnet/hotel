@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Labyrinth Hotel | Staircase Puzzle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* [1. 기본 테마 및 커서] */
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body {
+            background-color: #050505; color: #d4af37;
+            font-family: 'Nanum Myeongjo', serif;
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        .cursor { position: fixed; width: 8px; height: 8px; background: #8b0000; border-radius: 50%; pointer-events: none; z-index: 9999; }
+        .cursor-follower { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(139, 0, 0, 0.5); border-radius: 50%; pointer-events: none; transition: transform 0.1s; z-index: 9998; }
+
+        /* [2. 퍼즐 프레임] */
+        .puzzle-frame {
+            position: relative; width: 1000px; height: 750px;
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+            padding-bottom: 80px;
+        }
+
+        .header-title {
+            position: absolute; top: 20px; right: 50px;
+            font-family: 'Cinzel', serif; font-size: 2.8rem;
+            letter-spacing: 12px; opacity: 0.8;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .staircase { display: flex; flex-direction: column-reverse; align-items: center; width: 100%; }
+
+        /* [3. 계단 공통 스타일] */
+        .step {
+            position: relative; width: 180px; height: 38px; margin-bottom: 10px;
+            background: #111; border: 1px solid #332a1b;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* 사선 배치 (바닥부터 1번) */
+        .step:nth-child(1)  { transform: translateX(-200px); }
+        .step:nth-child(2)  { transform: translateX(-160px); }
+        .step:nth-child(3)  { transform: translateX(-120px); }
+        .step:nth-child(4)  { transform: translateX(-80px); }
+        .step:nth-child(5)  { transform: translateX(-40px); }
+        .step:nth-child(6)  { transform: translateX(0px); }
+        .step:nth-child(7)  { transform: translateX(40px); }
+        .step:nth-child(8)  { transform: translateX(80px); }
+        .step:nth-child(9)  { transform: translateX(120px); }
+        .step:nth-child(10) { transform: translateX(160px); }
+        .step:nth-child(11) { transform: translateX(200px); }
+
+        /* [4. 타입별 활성화 색상] */
+        
+        /* 타입 A: 그림이 있는 계단 (레드 테마) */
+        .step.has-img.active {
+            border-color: #8b0000;
+            background: linear-gradient(to right, #2a0505, #111);
+            box-shadow: 0 0 25px rgba(139, 0, 0, 0.7);
+        }
+
+        /* 타입 B: 화살표로 연결된 계단 (골드 테마) */
+        .step.is-pair.active {
+            border-color: #d4af37;
+            background: linear-gradient(to right, #2a2205, #111);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+        }
+
+        /* [5. 콘텐츠 연출] */
+        .content-img {
+            position: absolute; left: 200px;
+            width: 55px; height: 55px; object-fit: contain;
+            opacity: 0; transform: scale(0.4) rotate(-10deg);
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+        }
+        .step.active .content-img { opacity: 1; transform: scale(1.1) rotate(0deg); }
+
+        .marker {
+            position: absolute; left: -50px;
+            width: 30px; height: 30px;
+            border: 1px solid #444; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; color: #555;
+            transition: 0.4s;
+        }
+        .step.active .marker { 
+            color: #d4af37; border-color: #d4af37; 
+            box-shadow: 0 0 10px rgba(212, 175, 55, 0.6); 
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        /* 결과 문구 */
+        #final-answer {
+            position: absolute; bottom: 15px;
+            font-family: 'Cinzel', serif; font-size: 2rem;
+            color: #d4af37; letter-spacing: 8px;
+            opacity: 0; transition: opacity 1.5s ease, transform 1.5s ease;
+            transform: translateY(10px);
+        }
+        #final-answer.visible { opacity: 1; transform: translateY(0); text-shadow: 0 0 20px rgba(212, 175, 55, 0.5); }
+
+        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 300px #000; pointer-events: none; z-index: 100; }
+    </style>
+</head>
+<body oncontextmenu="return false" onselectstart="return false">
+
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <div class="vignette"></div>
+
+    <div class="puzzle-frame">
+        <div class="header-title">STAIRCASE</div>
+        <div id="final-answer">ANSWER : ① I ② I ③</div>
+
+        <div class="staircase">
+            <div class="step has-img" data-img="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768283620973/boots.png"></div>
+            
+            <div class="step is-pair" data-pair="1"><span class="marker">①</span></div>
+            <div class="step is-pair" data-pair="1"></div>
+
+            <div class="step has-img" data-img="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768283620973/bear.png"></div>
+
+            <div class="step is-pair" data-pair="2"><span class="marker">②</span></div>
+            <div class="step is-pair" data-pair="2"></div>
+
+            <div class="step has-img" data-img="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768284071388/roof.png"></div>
+
+            <div class="step is-pair" data-pair="3"><span class="marker">③</span></div>
+            <div class="step is-pair" data-pair="3"></div>
+
+            <div class="step has-img" data-img="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768283620973/moon.png"></div>
+
+            <div class="step has-img" data-img="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768283620973/noon.png"></div>
+        </div>
+    </div>
+
+    <script>
+        /* [보안 설정] */
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false;
+        };
+
+        /* [커서 로직] */
+        const cursor = document.querySelector('.cursor'), follower = document.querySelector('.cursor-follower');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+            setTimeout(() => { follower.style.left = e.clientX - 16 + 'px'; follower.style.top = e.clientY - 16 + 'px'; }, 50);
+        });
+
+        /* [계단 퍼즐 작동 로직] */
+        const steps = document.querySelectorAll('.step');
+
+        // 초기 이미지 주입
+        steps.forEach(step => {
+            if(step.dataset.img) {
+                const img = document.createElement('img');
+                img.src = step.dataset.img;
+                img.className = 'content-img';
+                step.appendChild(img);
+            }
+        });
+
+        steps.forEach(step => {
+            step.addEventListener('click', function() {
+                const pairId = this.dataset.pair;
+                
+                if (pairId) {
+                    // [is-pair] 타입: 화살표 연결 그룹 전체 토글
+                    const group = document.querySelectorAll(`.step[data-pair="${pairId}"]`);
+                    group.forEach(s => s.classList.toggle('active'));
+                } else {
+                    // [has-img] 타입: 개별 계단 토글
+                    this.classList.toggle('active');
+                }
+                
+                checkVictory();
+            });
+        });
+
+        function checkVictory() {
+            const allActive = Array.from(steps).every(s => s.classList.contains('active'));
+            const answerBox = document.getElementById('final-answer');
+            if (allActive) {
+                answerBox.classList.add('visible');
+            } else {
+                answerBox.classList.remove('visible');
+            }
+        }
+    </script>
+</body>
+</html>
