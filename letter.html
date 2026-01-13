@@ -49,7 +49,7 @@
         /* *** 핵심 변경: 두 그리드의 가로 길이 통일 *** */
         /* 상단(7열), 하단(5열) 모두 셀 너비를 동일하게 맞추고 열 개수를 통일 */
         .violin-grid, .guitar-grid {
-            grid-template-columns: repeat(7, 65px); /* 7열 기준, 셀 너비 65px 통일 */
+            grid-template-columns: repeat(6, 65px); /* 7열 기준, 셀 너비 65px 통일 */
             grid-template-rows: repeat(4, 65px);    /* 높이 기준 통일 */
         }
         /* 상단 그리드는 높이만 2행으로 재조정 */
@@ -93,7 +93,7 @@
         <div class="rhythm-section">
             <img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768286099441/violin.png" class="instrument-icon" alt="Violin">
             <div class="grid-container violin-grid">
-                <div class="cell">🐔</div><div class="cell">🐎</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐎</div><div class="cell">🐎</div><div class="cell"></div>
+                <div class="cell">🐔</div><div class="cell">🐎</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐎</div><div class="cell">🐎</div>
                 <div class="cell">🐎</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐎</div><div class="cell"></div>
             </div>
             <div class="equals-sign">=</div>
@@ -103,10 +103,10 @@
         <div class="rhythm-section">
             <img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768286099441/guitar (1).png" class="instrument-icon" alt="Guitar">
             <div class="grid-container guitar-grid" id="main-puzzle">
-                <div class="cell">🐢</div><div class="cell">🐘</div><div class="cell">🐰</div><div class="cell">🐢</div><div class="cell">🐰</div><div class="cell empty"></div><div class="cell empty"></div>
-                <div class="cell">🐰</div><div class="cell">🐢</div><div class="cell">🐘</div><div class="cell">🐘</div><div class="cell">🐘</div><div class="cell empty"></div><div class="cell empty"></div>
-                <div class="cell">🐘</div><div class="cell">🐘</div><div class="cell">🐢</div><div class="cell">🐰</div><div class="cell">🐘</div><div class="cell empty"></div><div class="cell empty"></div>
-                <div class="cell">🐰</div><div class="cell">🐢</div><div class="cell">🐘</div><div class="cell">🐢</div><div class="cell">🐰</div><div class="cell empty"></div><div class="cell empty"></div>
+                <div class="cell">🐢</div><div class="cell">🐘</div><div class="cell">🐰</div><div class="cell">🐢</div><div class="cell">🐰</div><div class="cell empty"></div>
+                <div class="cell">🐰</div><div class="cell">🐢</div><div class="cell">🐘</div><div class="cell">🐘</div><div class="cell">🐘</div><div class="cell empty"></div>
+                <div class="cell">🐘</div><div class="cell">🐘</div><div class="cell">🐢</div><div class="cell">🐰</div><div class="cell">🐘</div><div class="cell empty"></div>
+                <div class="cell">🐰</div><div class="cell">🐢</div><div class="cell">🐘</div><div class="cell">🐢</div><div class="cell">🐰</div><div class="cell empty"></div>
             </div>
             <div class="equals-sign">=</div>
             <div class="result-box" id="final-result" style="color:#8b0000">?</div>
