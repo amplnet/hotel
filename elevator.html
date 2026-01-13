@@ -26,7 +26,7 @@
             position: relative;
         }
 
-        /* 신규 추가: 액세스 코드 표시창 */
+        /* 액세스 상태 표시창 */
         #access-display {
             height: 20px;
             font-size: 0.75rem;
@@ -34,8 +34,8 @@
             text-align: center;
             letter-spacing: 2px;
             margin-bottom: 10px;
-            opacity: 0; /* 평소엔 숨김 */
-            transition: opacity 1s ease, transform 1s ease;
+            opacity: 0; 
+            transition: opacity 0.5s ease, transform 0.5s ease;
             transform: translateY(5px);
             font-weight: bold;
             text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
@@ -84,10 +84,10 @@
     <div class="vignette"></div>
 
     <div class="elevator-panel">
-        <div id="access-display">ACCESS CODE : checkinwaiting</div>
+        <div id="access-display">ELEVATOR ACTIVATED</div>
 
         <div class="panel-header">
-            LABYR<span class="hidden-trigger" onclick="revealCode()">IN</span>TH HOTEL
+            LABYR<span class="hidden-trigger" onclick="triggerElevator()">IN</span>TH HOTEL
         </div>
 
         <div class="floor-row">
@@ -146,13 +146,25 @@
             </div>
         </div>
     </div>
-    <script>
-        /* [핵심 기능: 코드 노출] */
-        function revealCode() {
+<script>
+        /* [핵심 기능: 부모 페이지 제어 이동] */
+        function triggerElevator() {
             const display = document.getElementById('access-display');
+            display.innerText = "MOVING TO DESTINATION...";
             display.classList.add('show');
             
-            // setTimeout(() => { display.classList.remove('show'); }, 5000);
+            // 1초 후 부모(메인) 페이지 이동 명령 수행
+            setTimeout(() => {
+                try {
+                    // 부모 페이지의 goNextPage 함수 실행
+                    window.parent.location.href = "javascript:goNextPage('checkinwaiting');";
+                } catch (e) {
+                    // 보안 정책으로 직접 href 제어가 막힐 경우 함수 직접 호출 시도
+                    if (window.parent && window.parent.goNextPage) {
+                        window.parent.goNextPage('checkinwaiting');
+                    }
+                }
+            }, 1000);
         }
 
         /* [보안 기능] */
