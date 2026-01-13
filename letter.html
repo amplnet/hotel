@@ -112,9 +112,6 @@
             <div class="result-box" id="final-result" style="color:#8b0000">?</div>
         </div>
 
-        <div class="answer-zone">
-            <input type="text" id="answer-input" placeholder="ENTER THE WORD" autocomplete="off">
-        </div>
     </div>
 
     <script>
@@ -130,29 +127,6 @@
             setTimeout(() => { follower.style.left = e.clientX - 16 + 'px'; follower.style.top = e.clientY - 16 + 'px'; }, 50);
         });
 
-        /* [퍼즐 정답 로직] */
-        const input = document.getElementById('answer-input');
-        const finalResult = document.getElementById('final-result');
-        
-        // 이 퍼즐의 실제 정답 단어를 여기에 입력하세요.
-        const CORRECT_ANSWER = "bat"; 
-
-        input.addEventListener('input', function() {
-            if (this.value.toUpperCase() === CORRECT_ANSWER) {
-                finalResult.innerText = "✨";
-                finalResult.style.color = "#d4af37";
-                input.style.borderColor = "#d4af37";
-                
-                // 1초 후 부모 페이지 이동 명령 수행 (iframe인 경우)
-                setTimeout(() => {
-                    try {
-                        window.parent.location.href = "javascript:goNextPage('rhythm_complete');";
-                    } catch(e) {
-                        alert("Access Granted: THE BEAT IS CORRECT");
-                    }
-                }, 1000);
-            }
-        });
     </script>
 </body>
 </html>
