@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Labyrinth Hotel | Rhythm Puzzle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* [1. 기본 테마 및 커서] */
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body {
+            background-color: #050505; color: #d4af37;
+            font-family: 'Nanum Myeongjo', serif;
+            height: 100vh; display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        .cursor { position: fixed; width: 8px; height: 8px; background: #8b0000; border-radius: 50%; pointer-events: none; z-index: 9999; }
+        .cursor-follower { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(139, 0, 0, 0.5); border-radius: 50%; pointer-events: none; transition: transform 0.1s; z-index: 9998; }
+
+        /* [2. 액자 프레임 디자인] */
+        .puzzle-frame {
+            position: relative; width: 1000px; padding: 50px;
+            background: #0a0a0a;
+            border: 2px solid #2a1f10; /* 골드 프레임 */
+            box-shadow: 0 0 100px rgba(0,0,0,1), inset 0 0 50px rgba(139, 0, 0, 0.1);
+            border-radius: 2px;
+            text-align: center;
+        }
+
+        .header-title {
+            font-family: 'Cinzel', serif; font-size: 1.8rem;
+            letter-spacing: 10px; margin-bottom: 40px;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+        }
+
+        /* [3. 리듬 그리드 레이아웃] */
+        .rhythm-section {
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 30px; gap: 20px;
+        }
+
+        /* 아이콘 이미지 스타일 */
+        .instrument-icon { width: 100px; height: auto; object-fit: contain; filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3)); }
+
+        .grid-container {
+            display: grid; border: 1px solid #332a1b; background: rgba(255,255,255,0.02);
+        }
+
+        /* *** 핵심 변경: 두 그리드의 가로 길이 통일 *** */
+        /* 상단(7열), 하단(5열) 모두 셀 너비를 동일하게 맞추고 열 개수를 통일 */
+        .violin-grid, .guitar-grid {
+            grid-template-columns: repeat(7, 65px); /* 7열 기준, 셀 너비 65px 통일 */
+            grid-template-rows: repeat(4, 65px);    /* 높이 기준 통일 */
+        }
+        /* 상단 그리드는 높이만 2행으로 재조정 */
+        .violin-grid { grid-template-rows: repeat(2, 65px); }
+
+        .cell {
+            border: 1px solid #222; display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; transition: 0.3s;
+        }
+        .cell.empty { background: rgba(0,0,0,0.3); border-color: transparent; } /* 빈 셀 스타일 */
+        .cell:not(.empty):hover { background: rgba(139, 0, 0, 0.2); }
+
+        .equals-sign { font-size: 2rem; color: #444; margin: 0 15px; }
+        .result-box {
+            width: 70px; height: 70px; border: 1px dashed #d4af37;
+            display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
+        }
+
+        /* [4. 정답 입력창] */
+        .answer-zone { margin-top: 30px; }
+        input {
+            background: transparent; border: none; border-bottom: 2px solid #332211;
+            color: #d4af37; font-family: 'Cinzel'; font-size: 1.5rem;
+            text-align: center; width: 300px; outline: none; letter-spacing: 5px;
+            transition: 0.5s;
+        }
+        input:focus { border-color: #8b0000; text-shadow: 0 0 10px #8b0000; }
+
+        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 300px #000; pointer-events: none; z-index: 100; }
+    </style>
+</head>
+<body oncontextmenu="return false">
+
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <div class="vignette"></div>
+
+    <div class="puzzle-frame">
+        <h2 class="header-title">SAY THE LETTER ON STRINGS?</h2>
+
+        <div class="rhythm-section">
+            <img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768286099441/violin.png" class="instrument-icon" alt="Violin">
+            <div class="grid-container violin-grid">
+                <div class="cell">🐔</div><div class="cell">🐎</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐎</div><div class="cell">🐎</div><div class="cell"></div>
+                <div class="cell">🐎</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐎</div><div class="cell"></div>
+            </div>
+            <div class="equals-sign">=</div>
+            <div class="result-box">🧊</div>
+        </div>
+
+        <div class="rhythm-section">
+            <img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768286099441/guitar (1).png" class="instrument-icon" alt="Guitar">
+            <div class="grid-container guitar-grid" id="main-puzzle">
+                <div class="cell">🐢</div><div class="cell">🐘</div><div class="cell">🐰</div><div class="cell">🐢</div><div class="cell">🐰</div><div class="cell empty"></div><div class="cell empty"></div>
+                <div class="cell">🐰</div><div class="cell">🐢</div><div class="cell">🐘</div><div class="cell">🐘</div><div class="cell">🐘</div><div class="cell empty"></div><div class="cell empty"></div>
+                <div class="cell">🐘</div><div class="cell">🐘</div><div class="cell">🐢</div><div class="cell">🐰</div><div class="cell">🐘</div><div class="cell empty"></div><div class="cell empty"></div>
+                <div class="cell">🐰</div><div class="cell">🐢</div><div class="cell">🐘</div><div class="cell">🐢</div><div class="cell">🐰</div><div class="cell empty"></div><div class="cell empty"></div>
+            </div>
+            <div class="equals-sign">=</div>
+            <div class="result-box" id="final-result" style="color:#8b0000">?</div>
+        </div>
+
+        <div class="answer-zone">
+            <input type="text" id="answer-input" placeholder="ENTER THE WORD" autocomplete="off">
+        </div>
+    </div>
+
+    <script>
+        /* [보안 설정] */
+        document.onkeydown = function(e) {
+            if(event.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false;
+        };
+
+        /* [커서 로직] */
+        const cursor = document.querySelector('.cursor'), follower = document.querySelector('.cursor-follower');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+            setTimeout(() => { follower.style.left = e.clientX - 16 + 'px'; follower.style.top = e.clientY - 16 + 'px'; }, 50);
+        });
+
+        /* [퍼즐 정답 로직] */
+        const input = document.getElementById('answer-input');
+        const finalResult = document.getElementById('final-result');
+        
+        // 이 퍼즐의 실제 정답 단어를 여기에 입력하세요.
+        const CORRECT_ANSWER = "bat"; 
+
+        input.addEventListener('input', function() {
+            if (this.value.toUpperCase() === CORRECT_ANSWER) {
+                finalResult.innerText = "✨";
+                finalResult.style.color = "#d4af37";
+                input.style.borderColor = "#d4af37";
+                
+                // 1초 후 부모 페이지 이동 명령 수행 (iframe인 경우)
+                setTimeout(() => {
+                    try {
+                        window.parent.location.href = "javascript:goNextPage('rhythm_complete');";
+                    } catch(e) {
+                        alert("Access Granted: THE BEAT IS CORRECT");
+                    }
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
