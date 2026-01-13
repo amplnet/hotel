@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labyrinth Hotel | Dessert Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* [1. 기본 설정 및 커서] */
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body { 
+            background-color: #050505; color: #d4af37; 
+            font-family: 'Nanum Myeongjo', serif; 
+            min-height: 100vh; display: flex; justify-content: center; align-items: center;
+            overflow-x: hidden;
+        }
+
+        .cursor { position: fixed; width: 8px; height: 8px; background: #8B0000; border-radius: 50%; pointer-events: none; z-index: 9999; }
+        .cursor-follower { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(139, 0, 0, 0.5); border-radius: 50%; pointer-events: none; transition: transform 0.1s; z-index: 9998; }
+
+        /* [2. 메인 컨테이너] */
+        .dessert-frame {
+            width: 95%; max-width: 1200px;
+            padding: 80px 20px; background: #0a0a0a;
+            border: 2px solid #1a1510; outline: 1px solid #2a1f10; outline-offset: -15px;
+            box-shadow: 0 0 100px rgba(0,0,0,1);
+            text-align: center; position: relative;
+        }
+
+        .header-title {
+            font-family: 'Cinzel', serif; font-size: 3.5rem;
+            letter-spacing: 15px; margin-bottom: 80px;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+        }
+
+        /* [3. 벤다이어그램 구조] */
+        .diagram-container {
+            display: flex; justify-content: space-around; flex-wrap: wrap; gap: 60px;
+        }
+
+        .venn-wrapper {
+            position: relative; width: 340px; height: 340px;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .circle {
+            position: absolute; width: 220px; height: 220px;
+            border: 1.5px solid rgba(212, 175, 55, 0.2); border-radius: 50%;
+            background: rgba(255, 255, 255, 0.01);
+            display: flex; justify-content: center; align-items: center;
+            transition: all 0.5s ease;
+        }
+
+        /* 벤다이어그램 배치 */
+        .c-top { transform: translateY(-55px); }
+        .c-left { transform: translate(-50px, 40px); }
+        .c-right { transform: translate(50px, 40px); }
+
+        /* [4. 샘플 이미지 스타일] */
+        .item-img {
+            width: 70px; height: 70px;
+            object-fit: contain;
+            /* 호텔 톤앤매너에 맞춘 이미지 보정 */
+            filter: sepia(0.3) contrast(1.1) drop-shadow(0 0 5px rgba(0,0,0,0.5));
+            opacity: 0.8;
+            transition: 0.3s;
+        }
+        .circle:hover .item-img { opacity: 1; transform: scale(1.1); }
+
+        /* 특정 위치 보정 */
+        .c-top .item-img { margin-bottom: 80px; }
+        .c-left .item-img { margin-right: 80px; margin-top: 40px; }
+        .c-right .item-img { margin-left: 80px; margin-top: 40px; }
+
+        /* 중앙 트리거 */
+        .center-trigger {
+            position: absolute; z-index: 10;
+            width: 75px; height: 75px;
+            background: #080808; border: 1px solid #d4af37; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-family: 'Cinzel', serif; font-size: 1.4rem; color: #d4af37;
+            box-shadow: 0 0 30px rgba(0,0,0,0.9);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .center-trigger:hover { 
+            background: #8b0000; border-color: #ff0000; 
+            color: #fff; transform: scale(1.15);
+            box-shadow: 0 0 25px rgba(139, 0, 0, 0.6);
+        }
+
+        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 300px #000; pointer-events: none; z-index: 1000; }
+
+        @media (max-width: 1100px) { .diagram-container { justify-content: center; } }
+    </style>
+</head>
+<body oncontextmenu="return false" onselectstart="return false">
+
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <div class="vignette"></div>
+
+    <div class="dessert-frame">
+        <h1 class="header-title">DESSERT</h1>
+
+        <div class="diagram-container">
+            <div class="venn-wrapper">
+                <div class="center-trigger">1~</div>
+                <div class="circle c-top"><img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768303039613/cheese.png" class="item-img" alt="Cheese"></div>
+                <div class="circle c-left"><img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768303039613/crab.png" class="item-img" alt="Crab"></div>
+                <div class="circle c-right"><img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768303039613/hawaii.png" class="item-img" alt="Aloha"></div>
+            </div>
+
+            <div class="venn-wrapper">
+                <div class="center-trigger">~2</div>
+                <div class="circle c-top"><img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768303039613/straw.png" class="item-img" alt="Straws"></div>
+                <div class="circle c-left"><img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768303039613/elder.png" class="item-img" alt="Old Couple"></div>
+                <div class="circle c-right"><img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768303039613/goose.png" class="item-img" alt="Goose"></div>
+            </div>
+
+            <div class="venn-wrapper">
+                <div class="center-trigger">~3</div>
+                <div class="circle c-top"><img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768303039613/green.png" class="item-img" alt="Green"></div>
+                <div class="circle c-left"><img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768303039613/white.png" class="item-img" style="filter: grayscale(1) brightness(2);" alt="White"></div>
+                <div class="circle c-right"><img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768303039613/black.png" class="item-img" style="filter: grayscale(1) brightness(0.2);" alt="Black"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* [보안 설정] */
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false;
+        };
+
+        /* [커서 로직] */
+        const cursor = document.querySelector('.cursor'), follower = document.querySelector('.cursor-follower');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+            setTimeout(() => { follower.style.left = e.clientX - 16 + 'px'; follower.style.top = e.clientY - 16 + 'px'; }, 50);
+        });
+
+        /* [퍼즐 로직] */
+        function solve(id) {
+            const answers = { '1': 'BLUE', '2': 'LONG', '3': 'PAINT' }; // 예시 로직
+            const ans = prompt("결론을 도출하십시오.");
+            if(ans && ans.toUpperCase() === answers[id]) {
+                alert("ACCESS GRANTED.");
+            }
+        }
+    </script>
+</body>
+</html>
