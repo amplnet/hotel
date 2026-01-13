@@ -3,97 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Labyrinth Hotel | Elevator</title>
+    <title>Labyrinth Hotel | Elevator Terminal</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 
     <style>
-        /* [1. 톤앤매너 통일 - 배경 및 기초] */
+        /* [기본 스타일 및 커서] */
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
         body { 
-            background-color: #050505; 
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; font-family: 'Pretendard', sans-serif;
-            overflow: hidden;
+            background-color: #050505; display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; font-family: 'Pretendard', sans-serif; overflow: hidden;
         }
-
-        /* 커스텀 커서 (도어락과 동일) */
         .cursor { position: fixed; width: 8px; height: 8px; background: #8B0000; border-radius: 50%; pointer-events: none; z-index: 9999; }
         .cursor-follower { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(139, 0, 0, 0.5); border-radius: 50%; pointer-events: none; transition: transform 0.1s; z-index: 9998; }
 
-        /* [2. 엘리베이터 패널 디자인] */
+        /* [엘리베이터 패널] */
         .elevator-panel {
             background: linear-gradient(145deg, #111, #050505);
-            padding: 40px 30px; 
-            border-radius: 4px; 
-            border: 1px solid #2a1f10; /* 골드 브라운 테두리 */
-            box-shadow: 0 0 80px rgba(0,0,0,1); 
-            width: 360px;
-            z-index: 100;
+            padding: 40px 30px; border-radius: 4px; border: 1px solid #2a1f10;
+            box-shadow: 0 0 80px rgba(0,0,0,1); width: 360px; z-index: 100;
+            position: relative;
+        }
+
+        /* 신규 추가: 액세스 코드 표시창 */
+        #access-display {
+            height: 20px;
+            font-size: 0.75rem;
+            color: #D4AF37;
+            text-align: center;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            opacity: 0; /* 평소엔 숨김 */
+            transition: opacity 1s ease, transform 1s ease;
+            transform: translateY(5px);
+            font-weight: bold;
+            text-shadow: 0 0 8px rgba(212, 175, 55, 0.6);
+        }
+        #access-display.show {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .panel-header {
-            color: #D4AF37; /* 안티크 골드 */
-            font-family: 'Nanum Myeongjo', serif;
-            font-size: 1.4rem; 
-            letter-spacing: 5px; 
-            margin-bottom: 40px;
-            text-align: center; 
-            border-bottom: 1px solid rgba(212, 175, 55, 0.3); 
+            color: #D4AF37; font-family: 'Nanum Myeongjo', serif;
+            font-size: 1.4rem; letter-spacing: 5px; margin-bottom: 40px;
+            text-align: center; border-bottom: 1px solid rgba(212, 175, 55, 0.3); 
             padding-bottom: 15px;
-            text-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
         }
 
-        /* 히든 트리거 (IN) */
-        .hidden-trigger {
-            color: inherit; text-decoration: none; cursor: none; outline: none;
-            -webkit-tap-highlight-color: transparent; user-select: none;
-        }
+        /* 히든 트리거 */
+        .hidden-trigger { color: inherit; text-decoration: none; outline: none; transition: color 0.3s; }
+        .hidden-trigger:active { color: #fff; }
 
+        /* 층별 버튼 및 태그 */
         .floor-row { display: flex; align-items: center; margin-bottom: 25px; }
-
-        /* [3. 버튼 디자인 - 도어락 키패드 스타일] */
         .btn-elevator {
             width: 65px; height: 65px; border-radius: 50%;
             background: radial-gradient(circle, #222, #0a0a0a);
-            border: 1px solid #332211; 
-            color: #555; /* 평소엔 어둡게 */
-            font-family: 'Nanum Myeongjo', serif; 
-            font-size: 1.4rem;
-            cursor: none; outline: none; 
-            transition: all 0.4s ease;
-            display: flex; justify-content: center; align-items: center;
+            border: 1px solid #332211; color: #555;
+            font-family: 'Nanum Myeongjo', serif; font-size: 1.4rem;
+            transition: all 0.4s ease; display: flex; justify-content: center; align-items: center;
         }
-
-        /* 호버 시 골드 테두리 */
-        .btn-elevator:hover {
-            border-color: #D4AF37;
-            color: #888;
-        }
-
-        /* 활성화 시 레드 글로우 (도어락 접속 포인트 감성) */
         .btn-elevator.active {
-            color: #fff;
-            background: radial-gradient(circle, #8B0000, #330000);
-            border-color: #FF0000;
-            box-shadow: 0 0 20px rgba(139, 0, 0, 0.8), inset 0 0 10px rgba(255, 0, 0, 0.4);
-            text-shadow: 0 0 10px #fff;
+            color: #fff; background: radial-gradient(circle, #8B0000, #330000);
+            border-color: #FF0000; box-shadow: 0 0 20px rgba(139, 0, 0, 0.8);
         }
 
         .directory-tag { margin-left: 25px; display: flex; flex-direction: column; }
-        .directory-tag .en { 
-            font-family: 'Nanum Myeongjo', serif;
-            font-size: 1rem; font-weight: bold; color: #D4AF37; 
-            letter-spacing: 1px; margin-bottom: 2px;
-        }
-        .directory-tag .ko { 
-            font-size: 0.8rem; color: #777; 
-            font-weight: 300; letter-spacing: -0.5px;
-        }
+        .directory-tag .en { font-family: 'Nanum Myeongjo', serif; font-size: 1rem; color: #D4AF37; }
+        .directory-tag .ko { font-size: 0.8rem; color: #777; font-weight: 300; }
 
-        /* 비네팅 효과 */
-        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 250px #000; pointer-events: none; z-index: 50; }
+        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 250px #000; pointer-events: none; }
     </style>
 </head>
 <body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
@@ -103,8 +84,10 @@
     <div class="vignette"></div>
 
     <div class="elevator-panel">
+        <div id="access-display">ACCESS CODE : checkinwaiting</div>
+
         <div class="panel-header">
-            LABYR<span class="hidden-trigger" onclick="alert('IN 부분을 확인하자, 엘리베이터가 천천히 움직이기 시작했다. 화면에 checkinwaiting이라는 글자가 나타났다.');">IN</span>TH HOTEL
+            LABYR<span class="hidden-trigger" onclick="revealCode()">IN</span>TH HOTEL
         </div>
 
         <div class="floor-row">
@@ -163,13 +146,18 @@
             </div>
         </div>
     </div>
-
     <script>
-        /* [보안 스크립트: 도어락과 동일] */
+        /* [핵심 기능: 코드 노출] */
+        function revealCode() {
+            const display = document.getElementById('access-display');
+            display.classList.add('show');
+            
+            // setTimeout(() => { display.classList.remove('show'); }, 5000);
+        }
+
+        /* [보안 기능] */
         document.onkeydown = function(e) {
-            if(event.keyCode == 123) return false; // F12 차단
-            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // 검사 차단
-            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // 소스보기 차단
+            if(event.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false;
         };
 
         /* [커서 로직] */
@@ -183,12 +171,6 @@
                 follower.style.top = e.clientY - 16 + 'px';
             }, 50);
         });
-
-        /* [엘리베이터 작동 로직] */
-        function handleFloor(btn) {
-            alert('버튼의 색깔이 붉게 변했지만, 아무런 일도 일어나지 않았다');
-            btn.classList.toggle('active');
-        }
     </script>
 </body>
 </html>
