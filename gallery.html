@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Labyrinth Hotel | Gallery Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* [1. 기본 테마 및 커서] */
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body {
+            background-color: #050505; color: #d4af37;
+            font-family: 'Nanum Myeongjo', serif;
+            height: 100vh; display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            overflow: hidden;
+        }
+
+        /* 커스텀 커서 */
+        .cursor { position: fixed; width: 8px; height: 8px; background: #8b0000; border-radius: 50%; pointer-events: none; z-index: 9999; }
+        .cursor-follower { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(139, 0, 0, 0.5); border-radius: 50%; pointer-events: none; transition: transform 0.1s; z-index: 9998; }
+
+        /* [2. 갤러리 액자 디자인] */
+        .gallery-container {
+            position: relative;
+            padding: 30px;
+            background: #0a0a0a;
+            border: 10px solid #1a1510; /* 외곽 두꺼운 프레임 */
+            outline: 2px solid #d4af37; /* 금색 라인 */
+            box-shadow: 0 50px 100px rgba(0,0,0,1);
+            text-align: center;
+        }
+
+        .image-wrapper {
+            position: relative;
+            width: 800px; /* 이미지 크기에 맞춰 조정 */
+            line-height: 0;
+            overflow: hidden;
+        }
+
+        .main-artwork {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* [3. 컬러 오버레이 레이어] */
+        #color-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; /* 클릭 방해 금지 */
+            mix-blend-mode: overlay; /* 색상이 자연스럽게 덮이도록 블렌딩 모드 사용 */
+            transition: background-color 1.5s ease; /* 부드러운 색 전환 */
+            background-color: transparent;
+        }
+
+        /* [4. 컨트롤 버튼 섹션] */
+        .controls {
+            margin-top: 40px;
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+        }
+
+        .btn-color {
+            width: 140px;
+            padding: 14px 0;
+            background: transparent;
+            font-family: 'Cinzel', serif;
+            font-size: 1.4rem;
+            letter-spacing: 3px;
+            border: 1px solid #332a1b;
+            color: #554433;
+            transition: all 0.4s ease;
+            outline: none;
+        }
+
+        /* 버튼 호버 효과 */
+        .btn-color:hover { border-color: #d4af37; color: #d4af37; }
+
+        /* 각 버튼 활성화 스타일 */
+        .btn-red:active, .btn-red.active { background: #4a0000; color: #fff; border-color: #8b0000; box-shadow: 0 0 15px #8b0000; }
+        .btn-green:active, .btn-green.active { background: #003300; color: #fff; border-color: #008000; box-shadow: 0 0 15px #008000; }
+        .btn-blue:active, .btn-blue.active { background: #001a33; color: #fff; border-color: #004080; box-shadow: 0 0 15px #004080; }
+
+        .header-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            letter-spacing: 8px;
+            margin-bottom: 25px;
+            opacity: 0.8;
+        }
+
+        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 300px #000; pointer-events: none; z-index: 1000; }
+    </style>
+</head>
+<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
+
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <div class="vignette"></div>
+
+    <div class="gallery-container">
+        <h1 class="header-title">ANSWER CODE : COLORLESS</h1>
+        
+        <div class="image-wrapper">
+            <img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1767765417000/bund.png" class="main-artwork" alt="The Bund Artwork">
+            <div id="color-overlay"></div>
+        </div>
+
+        <div class="controls">
+            <button class="btn-color btn-red" onclick="applyColor('red', this)">RED</button>
+            <button class="btn-color btn-green" onclick="applyColor('green', this)">GREEN</button>
+            <button class="btn-color btn-blue" onclick="applyColor('blue', this)">BLUE</button>
+            <button class="btn-color" onclick="applyColor('reset', this)">RESET</button>
+        </div>
+    </div>
+
+    <script>
+        /* [보안 설정] */
+        document.onkeydown = function(e) {
+            if(event.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false;
+        };
+
+        /* [커서 로직] */
+        const cursor = document.querySelector('.cursor'), follower = document.querySelector('.cursor-follower');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+            setTimeout(() => { follower.style.left = e.clientX - 16 + 'px'; follower.style.top = e.clientY - 16 + 'px'; }, 50);
+        });
+
+        /* [컬러 필터 로직] */
+        function applyColor(color, btn) {
+            const overlay = document.getElementById('color-overlay');
+            
+            // 모든 버튼에서 active 클래스 제거
+            document.querySelectorAll('.btn-color').forEach(b => b.classList.remove('active'));
+            
+            // 버튼 활성화 표시
+            if(color !== 'reset') btn.classList.add('active');
+
+            // 색상 적용 (반투명도 조절로 느낌 구현)
+            switch(color) {
+                case 'red':
+                    overlay.style.backgroundColor = "rgba(200, 0, 0, 0.5)";
+                    break;
+                case 'green':
+                    overlay.style.backgroundColor = "rgba(0, 200, 0, 0.5)";
+                    break;
+                case 'blue':
+                    overlay.style.backgroundColor = "rgba(0, 0, 255, 0.5)";
+                    break;
+                case 'reset':
+                    overlay.style.backgroundColor = "transparent";
+                    break;
+            }
+        }
+    </script>
+</body>
+</html>
