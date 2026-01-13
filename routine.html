@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labyrinth Hotel | Routine Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        /* [1. 기본 설정 및 커서] */
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body { 
+            background-color: #050505; color: #d4af37; 
+            font-family: 'Nanum Myeongjo', serif; 
+            min-height: 100vh; display: flex; justify-content: center; align-items: center;
+        }
+
+        .cursor { position: fixed; width: 8px; height: 8px; background: #8B0000; border-radius: 50%; pointer-events: none; z-index: 9999; }
+        .cursor-follower { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(139, 0, 0, 0.5); border-radius: 50%; pointer-events: none; transition: transform 0.1s; z-index: 9998; }
+
+        /* [2. 메인 컨테이너 - 가로폭 확장] */
+        .routine-container {
+            width: 95%; max-width: 900px; /* 가로폭을 넓혀 큰 글씨 수용 */
+            padding: 60px; background: #0a0a0a;
+            border: 2px solid #1a1510;
+            outline: 1px solid #2a1f10; outline-offset: -15px;
+            box-shadow: 0 0 100px rgba(0,0,0,1);
+            text-align: center;
+        }
+
+        .title {
+            font-family: 'Cinzel', serif; font-size: 3.5rem; /* 제목 확대 */
+            letter-spacing: 15px; color: #d4af37; margin-bottom: 50px;
+            text-shadow: 0 0 25px rgba(212, 175, 55, 0.3);
+        }
+
+        /* [3. 달력 그리드] */
+        .calendar-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            border: 2px solid #1a1510;
+        }
+
+        .cell {
+            aspect-ratio: 1 / 1; display: flex; justify-content: center; align-items: center;
+            border: 1px solid #1a1510; 
+            position: relative; overflow: visible; /* 동그라미가 잘리지 않도록 변경 */
+            background: #0d0d0d;
+            transition: background 0.5s ease, border-color 0.5s ease;
+        }
+
+        .header { 
+            background: #111; font-weight: bold; font-size: 1.8rem; /* 헤더 글씨 확대 */
+            color: #554433; border-bottom: 3px solid #1a1510; 
+            font-family: 'Cinzel', serif;
+        }
+
+        /* [4. 글씨 크기 대폭 확대 (2배 이상)] */
+        .date-val { 
+            font-size: 2.2rem; /* 기존 1.1rem -> 2.2rem */
+            font-family: 'Cinzel', serif;
+            transition: all 0.4s ease;
+            z-index: 2;
+        }
+        
+        .reveal-num {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-family: 'Cinzel', serif; 
+            font-size: 2rem; /* 기존 1.8rem -> 4rem (비밀번호 가독성 극대화) */
+            font-weight: 700;
+            opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* [5. 동그라미 로직 수정 (깨짐 방지)] */
+        .marked::before {
+            content: ''; position: absolute; 
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; height: 85%;
+            border: 3px solid rgba(139, 0, 0, 0.4); /* 평상시 투명도 조절 */
+            border-radius: 48% 52% 55% 45% / 45% 55% 42% 58%;
+            transition: all 0.5s ease;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 클릭 시 상태 변화 (깨지지 않고 유지 및 강화) */
+        .cell.active {
+            background: radial-gradient(circle, #3a0000 0%, #0a0a0a 100%);
+            border-color: #8b0000;
+        }
+
+        .cell.active .date-val { opacity: 0.1; transform: scale(0.8); } /* 날짜를 흐릿하게 유지 */
+        .cell.active .reveal-num { 
+            opacity: 1; transform: translate(-50%, -50%) scale(1);
+            color: #ff3333; text-shadow: 0 0 20px #ff0000;
+        }
+
+        /* 동그라미가 깨지지 않고 더 진해지며 강조됨 */
+        .cell.active::before {
+            border-color: #ff0000;
+            border-width: 4px;
+            width: 90%; height: 90%;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+            opacity: 1;
+        }
+
+        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 300px #000; pointer-events: none; z-index: 1000; }
+    </style>
+</head>
+<body oncontextmenu="return false" onselectstart="return false">
+
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <div class="vignette"></div>
+
+    <div class="routine-container">
+        <h1 class="title">R    O    U    T    I    N   E</h1>
+
+        <div class="calendar-grid">
+            <div class="cell header">MON</div><div class="cell header">TUE</div><div class="cell header">WED</div><div class="cell header">THU</div><div class="cell header">FRI</div><div class="cell header">SAT</div><div class="cell header">SUN</div>
+
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            <div class="cell"><span class="date-val">1</span></div><div class="cell"><span class="date-val">2</span></div>
+            <div class="cell"><span class="date-val">3</span></div><div class="cell"><span class="date-val">4</span></div><div class="cell"><span class="date-val">5</span></div>
+            
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">6</span><span class="reveal-num">1</span></div>
+            <div class="cell"><span class="date-val">7</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">8</span><span class="reveal-num">3</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">9</span><span class="reveal-num">2</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">10</span><span class="reveal-num">3</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">11</span><span class="reveal-num">4</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">12</span><span class="reveal-num">2</span></div>
+            
+            <div class="cell"><span class="date-val">13</span></div><div class="cell"><span class="date-val">14</span></div><div class="cell"><span class="date-val">15</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">16</span><span class="reveal-num">1</span></div>
+            <div class="cell"><span class="date-val">17</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">18</span><span class="reveal-num">2</span></div>
+            <div class="cell"><span class="date-val">19</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">20</span><span class="reveal-num">3</span></div>
+            <div class="cell"><span class="date-val">21</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">22</span><span class="reveal-num">1</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">23</span><span class="reveal-num">4</span></div>
+            
+            <div class="cell"><span class="date-val">24</span></div><div class="cell"><span class="date-val">25</span></div><div class="cell"><span class="date-val">26</span></div><div class="cell"><span class="date-val">27</span></div><div class="cell"><span class="date-val">28</span></div><div class="cell"></div><div class="cell"></div>
+        </div>
+    </div>
+
+    <script>
+        document.onkeydown = function(e) {
+            if(event.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false;
+        };
+
+        const cursor = document.querySelector('.cursor'), follower = document.querySelector('.cursor-follower');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
+            setTimeout(() => { follower.style.left = e.clientX - 16 + 'px'; follower.style.top = e.clientY - 16 + 'px'; }, 50);
+        });
+
+        function toggleCell(elem) {
+            elem.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
