@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labyrinth Hotel | Private Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,400&family=Montserrat:wght@300&display=swap" rel="stylesheet">
+    
+    <style>
+
+        * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
+        body, html { 
+            background-color: #050505; color: #e0e0e0; 
+            font-family: 'Cormorant Garamond', serif; 
+            overflow: hidden; width: 100%; height: 100%;
+        }
+
+
+        .cursor { position: fixed; width: 8px; height: 8px; background: #8b0000; border-radius: 50%; pointer-events: none; z-index: 9999; }
+        .cursor-follower { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(139, 0, 0, 0.5); border-radius: 50%; pointer-events: none; transition: transform 0.1s; z-index: 9998; }
+
+
+        #terminal-wrapper {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, #151515 0%, #000 100%);
+            display: flex; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .lock-box {
+            width: 340px; padding: 60px 20px;
+            background: linear-gradient(145deg, #111, #050505);
+            border: 1px solid #2a1f10; border-radius: 2px; text-align: center;
+            box-shadow: 0 0 80px rgba(0,0,0,1);
+        }
+        .hotel-title { 
+            font-family: 'Cinzel', serif; color: #d4af37; 
+            letter-spacing: 7px; font-size: 1.3rem; margin-bottom: 50px;
+            text-shadow: 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+
+        .display-dots { display: flex; justify-content: center; gap: 20px; margin-bottom: 50px; }
+        .dot { width: 10px; height: 10px; border: 1px solid #333; border-radius: 50%; transition: 0.4s; }
+        .dot.active { background-color: #8b0000; box-shadow: 0 0 15px #ff0000; border: none; transform: scale(1.3); }
+
+
+        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; padding: 0 25px; }
+        .btn-key { 
+            background: transparent; border: 1px solid #222; color: #555; 
+            padding: 20px 0; font-size: 1.1rem; font-family: 'Cinzel'; 
+            transition: 0.3s; outline: none;
+        }
+        .btn-key:hover { border-color: #444; color: #888; }
+        .btn-key:active { background: #4a0000; color: #fff; border-color: #8b0000; }
+        .btn-key.gold { color: #d4af37; border-color: #332211; }
+
+
+        #status-text { 
+            margin-top: 40px; font-size: 0.8rem; letter-spacing: 4px; 
+            color: #333; text-transform: uppercase; min-height: 20px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .success-text { color: #d4af37 !important; text-shadow: 0 0 10px rgba(212, 175, 55, 0.5); font-weight: bold; }
+        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 250px #000; pointer-events: none; }
+
+ 
+        .error-shake { color: #8b0000 !important; animation: shake 0.4s; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20% { transform: translateX(-8px); } 80% { transform: translateX(8px); } }
+    </style>
+</head>
+<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
+
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <div class="vignette"></div>
+
+    <div id="terminal-wrapper">
+        <div class="lock-box">
+            <div class="hotel-title">LABYRINTH</div>
+            <div class="display-dots">
+                <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+            </div>
+            <div class="keypad-grid">
+                <button class="btn-key" onclick="vP('1')">1</button>
+                <button class="btn-key" onclick="vP('2')">2</button>
+                <button class="btn-key" onclick="vP('3')">3</button>
+                <button class="btn-key" onclick="vP('4')">4</button>
+                <button class="btn-key" onclick="vP('5')">5</button>
+                <button class="btn-key" onclick="vP('6')">6</button>
+                <button class="btn-key" onclick="vP('7')">7</button>
+                <button class="btn-key" onclick="vP('8')">8</button>
+                <button class="btn-key" onclick="vP('9')">9</button>
+                <button class="btn-key" onclick="vC()">C</button>
+                <button class="btn-key" onclick="vP('0')">0</button>
+                <button class="btn-key gold" onclick="vA()">E</button>
+            </div>
+            <p id="status-text">REQUIRED : 4 DIGITS</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', e => {
+            if (e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) {
+                e.preventDefault(); return false;
+            }
+        });
+
+        const crsr = document.querySelector('.cursor'), folw = document.querySelector('.cursor-follower');
+        document.addEventListener('mousemove', e => {
+            crsr.style.left = e.clientX + 'px'; crsr.style.top = e.clientY + 'px';
+            setTimeout(() => { folw.style.left = e.clientX - 16 + 'px'; folw.style.top = e.clientY - 16 + 'px'; }, 50);
+        });
+
+        const _d = {
+            _x1: "TnpFMk5nPT0=", // 
+            _x2: "UVVORFJWTlRJRU5QUkVVZ09pQklUMVF6VEE9PQ=="
+        };
+
+        const _dec = (s) => { try { return atob(atob(s)); } catch(e) { return atob(s); } };
+
+        let _buf = "";
+
+        function vP(n) {
+            if (_buf.length < 4) {
+                _buf += n;
+                _uD();
+                document.getElementById('status-text').innerText = "INPUTTING...";
+            }
+        }
+
+        function vC() {
+            _buf = "";
+            _uD();
+            document.getElementById('status-text').innerText = "REQUIRED : 4 DIGITS";
+            document.getElementById('status-text').classList.remove('success-text', 'error-shake');
+        }
+
+        function _uD() {
+            const dots = document.querySelectorAll('.dot');
+            dots.forEach((d, i) => { i < _buf.length ? d.classList.add('active') : d.classList.remove('active'); });
+        }
+
+        function vA() {
+            const st = document.getElementById('status-text');
+            if (_buf === _dec(_d._x1)) {
+                // 성공 시
+                st.innerText = "VERIFYING...";
+                setTimeout(() => {
+                    st.innerText = _dec(_d._x2); //
+                    st.classList.add('success-text');
+                }, 800);
+            } else {
+                // 실패 시
+                st.innerText = "INVALID ACCESS";
+                st.classList.add('error-shake');
+                setTimeout(() => { vC(); }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
