@@ -4,21 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Labyrinth Hotel - Secret Crossword</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Noto+Sans+KR:wght@300;500&family=Space+Mono&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Noto+Serif+KR:wght@300;600&family=Space+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <style>
         :root {
-            --bg-dark: #050505;
-            --gold-main: #c5a059;
-            --gold-dim: rgba(197, 160, 89, 0.2);
-            --grid-bg: #111111;
-            --text-color: #d4d4d4;
+            /* == DARK LUXURIOUS SILVER PALETTE == */
+            --bg-dark: transparent; /* iframe 배경 투명화 */
+            --silver-dark: #5a5550;    /* 어둡고 묵직한 실버 */
+            --silver-mid: #8c8883;     /* 중간 톤의 따뜻한 그레이 실버 */
+            --silver-light: #b8b4b0;   /* 하이라이트용 밝은 그레이 */
+            --metal-frame: #2a2725;    /* 아주 어두운 금속 프레임 */
+            --text-muted: #999590;     /* 차분한 텍스트 색상 */
+            --grid-bg: #11100f;        /* 그리드 배경 */
+            --preview-bg: rgba(140, 136, 131, 0.15); /* 드래그 미리보기 (은은함) */
         }
 
         body {
             background-color: var(--bg-dark);
-            color: var(--gold-main);
-            font-family: 'Noto Sans KR', sans-serif;
+            color: var(--silver-mid);
+            /* 한글은 Noto Serif KR, 영문/숫자는 Cormorant Garamond 우선 */
+            font-family: 'Cormorant Garamond', 'Noto Serif KR', serif;
             margin: 0;
             padding: 40px 20px;
             display: flex;
@@ -31,17 +36,24 @@
         header {
             text-align: center;
             margin-bottom: 40px;
+            width: 100%;
+            max-width: 1000px;
+            border-bottom: 1px solid var(--metal-frame);
+            padding-bottom: 20px;
         }
 
         h1 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2.5rem;
-            letter-spacing: 12px;
+            font-family: 'Cinzel', serif; /* 제목은 웅장한 Cinzel 사용 */
+            font-size: 2.2rem;
+            letter-spacing: 8px;
             margin: 0;
             text-transform: uppercase;
-            background: linear-gradient(to right, #8e6d3d, #e6cc92, #8e6d3d);
+            /* 묵직한 다크 실버 그라데이션 */
+            background: linear-gradient(to right, var(--silver-dark), var(--silver-light), var(--silver-dark));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
         .main-container {
@@ -64,10 +76,13 @@
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 2px;
-            background-color: #222;
-            border: 2px solid var(--gold-main);
+            background-color: var(--metal-frame);
+            border: 4px solid var(--metal-frame); /* 테두리를 더 두껍고 어둡게 */
             aspect-ratio: 1 / 1;
-            box-shadow: 0 25px 50px rgba(0,0,0,0.9);
+            box-shadow: 
+                0 30px 60px rgba(0,0,0,0.9),
+                inset 0 0 30px rgba(0,0,0,0.8); /* 깊이감 추가 */
+            border-radius: 2px;
         }
 
         .cell {
@@ -76,22 +91,28 @@
             align-items: center;
             justify-content: center;
             font-size: 1.3rem;
-            color: var(--text-color);
+            font-family: 'Noto Serif KR', serif; /* 셀 안의 글씨는 명조체 */
+            color: #666; /* 기본 상태는 어둡게 */
             cursor: crosshair;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
             position: relative;
+            border: 1px solid rgba(255,255,255,0.02);
         }
 
         /* 드래그 중인 미리보기 상태 */
         .cell.preview {
-            background-color: var(--gold-dim);
+            background-color: var(--preview-bg);
+            color: var(--silver-light);
         }
 
-        /* 확정된 하이라이트 상태 (지속됨) */
+        /* 확정된 하이라이트 상태 (지속됨) - 묵직한 금속 질감 */
         .cell.highlighted {
-            background-color: var(--gold-main);
-            color: var(--bg-dark);
+            /* 너무 밝지 않은, 깊이 있는 금속 그라데이션 */
+            background: linear-gradient(145deg, var(--silver-dark), var(--silver-mid));
+            color: #050505; /* 글자색을 어둡게 하여 대비를 줌 */
             font-weight: 700;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.3); /* 내부 그림자로 입체감 */
+            text-shadow: 0 1px 1px rgba(255,255,255,0.2); /* 금속에 각인된 느낌 */
         }
 
         /* === Clues List === */
@@ -100,32 +121,52 @@
             min-width: 350px;
             display: flex;
             flex-direction: column;
-            gap: 30px;
+            gap: 35px;
         }
 
         .clue-group h2 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.8rem;
-            border-bottom: 1px solid var(--gold-main);
+            font-family: 'Cinzel', serif; /* Cinzel 폰트 적용 */
+            font-size: 1.4rem;
+            color: var(--silver-mid);
+            border-bottom: 1px solid var(--metal-frame);
             margin: 0 0 15px 0;
-            padding-bottom: 5px;
+            padding-bottom: 8px;
+            letter-spacing: 3px;
         }
 
         .clue-item {
-            padding: 12px;
-            margin-bottom: 8px;
-            background-color: #1a1a1a;
-            border-left: 2px solid var(--gold-main);
-            font-size: 0.85rem;
+            padding: 15px;
+            margin-bottom: 10px;
+            background-color: rgba(20, 20, 20, 0.8); /* 더 어두운 배경 */
+            border-left: 2px solid var(--metal-frame);
+            font-size: 0.95rem;
+            color: var(--text-muted);
             cursor: grab;
-            transition: 0.2s;
+            transition: all 0.3s;
         }
 
-        .clue-item:hover { background-color: #222; }
-        .sortable-ghost { opacity: 0.3; background-color: var(--gold-main); }
+        .clue-item:hover {
+            background-color: rgba(40, 40, 40, 0.8);
+            border-left-color: var(--silver-mid);
+            color: var(--silver-light);
+        }
+
+        /* 힌트의 'O' 강조 표시 */
+        .clue-item font {
+            font-family: 'Space Mono', monospace; /* 기술적인 느낌의 폰트 */
+            color: var(--silver-light) !important;
+            font-weight: bold;
+        }
+
+        .sortable-ghost {
+            opacity: 0.3;
+            background-color: var(--silver-dark);
+            border: 1px dashed var(--silver-light);
+        }
 
         @media (max-width: 850px) {
             .main-container { flex-direction: column; align-items: center; }
+            h1 { font-size: 1.8rem; letter-spacing: 5px; }
         }
     </style>
 </head>
@@ -142,26 +183,19 @@
 
         <div class="clues-section">
             <div class="clue-group">
-                <h2>Across</h2>
+                <h2>Across (Movable)</h2>
                 <ul id="across-list" class="sortable-list">
-                    <li class="clue-item">1<font color="#EAEAB2"
->O</font>73년 독일, 오스트리아, 제정 러시아 황제 삼국 협정</li>
-                    <li class="clue-item">남<font color="#EAEAB2"
->O</font> 지방에서 부르는 진양조장단의 잡가</li>
-                    <li class="clue-item">옻<font color="#EAEAB2"
->O</font>과에 속한 옻나무의 생약명</li>
-                    <li class="clue-item">좁<font color="#EAEAB2"
->O</font> 그릇에서 찌개 따위가 요란스럽게 끓다</li>
-                    <li class="clue-item">조<font color="#EAEAB2"
->O</font> 시대 이두 문서 한자 어구 표기 책</li>
-                    <li class="clue-item">아<font color="#EAEAB2"
->O</font>아 동쪽 끝에 있는 입헌 군주국</li>
-                    <li class="clue-item">맡<font color="#EAEAB2"
->O</font>보던 일자리를 그만두고 물러남</li>
+                    <li class="clue-item">1<font>O</font>73년 독일, 오스트리아, 러시아 황제 삼국 협정</li>
+                    <li class="clue-item">남<font>O</font> 지방에서 부르는 진양조장단의 잡가</li>
+                    <li class="clue-item">옻<font>O</font>과에 속한 옻나무의 생약명</li>
+                    <li class="clue-item">좁<font>O</font> 그릇에서 찌개 따위가 요란스럽게 끓다</li>
+                    <li class="clue-item">조<font>O</font> 시대 이두 문서 한자 어구 표기 책</li>
+                    <li class="clue-item">아<font>O</font>아 동쪽 끝에 있는 입헌 군주국</li>
+                    <li class="clue-item">맡<font>O</font>보던 일자리를 그만두고 물러남</li>
                 </ul>
             </div>
             <div class="clue-group">
-                <h2>Down</h2>
+                <h2>Down (Movable)</h2>
                 <ul id="down-list" class="sortable-list">
                     <li class="clue-item">멕시코의 매운 고추 요리</li>
                     <li class="clue-item">머리에 다섯 쌍의 다리가 있는 연체동물</li>
@@ -176,6 +210,7 @@
     </div>
 
     <script>
+        // (스크립트 부분은 기존과 동일하게 유지합니다)
         const gridData = [
             ["이", "문", "대", "사", "의", "일", "본"],
             ["온", "숫", "자", "과", "를", "품", "제"],
@@ -191,7 +226,6 @@
         let startPos = null;
         let currentPath = [];
 
-        // 그리드 생성
         gridData.flat().forEach((char, i) => {
             const cell = document.createElement('div');
             cell.className = 'cell';
@@ -199,10 +233,11 @@
             cell.dataset.r = Math.floor(i / 7);
             cell.dataset.c = i % 7;
 
-            cell.onmousedown = () => {
+            cell.onmousedown = (e) => {
                 isDragging = true;
                 startPos = { r: +cell.dataset.r, c: +cell.dataset.c };
                 updatePath(startPos);
+                e.preventDefault();
             };
 
             cell.onmouseenter = () => {
@@ -214,7 +249,37 @@
 
         window.onmouseup = () => {
             if (isDragging) {
-                // 드래그 종료 시 해당 경로의 모든 셀 토글
+                currentPath.forEach(el => el.classList.toggle('highlighted'));
+                clearPreview();
+                isDragging = false;
+                startPos = null;
+            }
+        };
+
+        // 터치 지원
+        gridContainer.ontouchstart = (e) => {
+            const touch = e.touches[0];
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (el && el.classList.contains('cell')) {
+                isDragging = true;
+                startPos = { r: +el.dataset.r, c: +el.dataset.c };
+                updatePath(startPos);
+                e.preventDefault();
+            }
+        };
+
+        gridContainer.ontouchmove = (e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (el && el.classList.contains('cell')) {
+                updatePath({ r: +el.dataset.r, c: +el.dataset.c });
+            }
+            e.preventDefault();
+        };
+
+        gridContainer.ontouchend = () => {
+            if (isDragging) {
                 currentPath.forEach(el => el.classList.toggle('highlighted'));
                 clearPreview();
                 isDragging = false;
@@ -235,9 +300,9 @@
                 const c = +cell.dataset.c;
                 let inPath = false;
 
-                if (cd >= rd) { // 가로 방향 우선
+                if (cd >= rd) {
                     if (r === startPos.r && c >= Math.min(startPos.c, endPos.c) && c <= Math.max(startPos.c, endPos.c)) inPath = true;
-                } else { // 세로 방향 우선
+                } else {
                     if (c === startPos.c && r >= Math.min(startPos.r, endPos.r) && r <= Math.max(startPos.r, endPos.r)) inPath = true;
                 }
 
@@ -252,7 +317,6 @@
             document.querySelectorAll('.cell').forEach(c => c.classList.remove('preview'));
         }
 
-        // 리스트 드래그 앤 드롭
         new Sortable(document.getElementById('across-list'), { animation: 150, ghostClass: 'sortable-ghost' });
         new Sortable(document.getElementById('down-list'), { animation: 150, ghostClass: 'sortable-ghost' });
     </script>
