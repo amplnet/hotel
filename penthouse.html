@@ -3,214 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Labyrinth Hotel - Secret Master Grid</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <title>Labyrinth Hotel - Permanent Master Grid</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Space+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #050505;
-            --gold-main: #c5a059;
-            --gold-glow: rgba(197, 160, 89, 0.3);
-            --cell-bg-hidden: #111111;
-            --cell-bg-reveal: rgba(197, 160, 89, 0.15);
+            /* == DARK LUXURIOUS SILVER PALETTE == */
+            --bg-dark: transparent;
+            --silver-dark: #5a5550;
+            --silver-mid: #8c8883;
+            --silver-light: #b8b4b0;
+            --metal-frame: #2a2725;
+            --grid-bg: #11100f;
         }
 
         body {
-            background-color: var(--bg-deep);
-            background-image: radial-gradient(circle at 2px 2px, rgba(197, 160, 89, 0.05) 1px, transparent 0);
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 2px 2px, rgba(140, 136, 131, 0.05) 1px, transparent 0);
             background-size: 30px 30px;
-            color: var(--gold-main);
+            color: var(--silver-mid);
             font-family: 'Cormorant Garamond', serif;
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            user-select: none;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 40px;
+            margin: 0; padding: 40px 20px;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; user-select: none;
         }
 
         h1 {
-            font-size: 2.5rem;
-            letter-spacing: 12px;
-            margin: 0;
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem; letter-spacing: 12px;
             text-transform: uppercase;
-            background: linear-gradient(to right, #8e6d3d, #e6cc92, #8e6d3d);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            background: linear-gradient(to right, var(--silver-dark), var(--silver-light), var(--silver-dark));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 40px;
         }
 
-        /* 7x7 그리드 프레임 */
+        /* 그리드 프레임: 행열 크기 동일하게 고정 */
         .grid-frame {
-            position: relative;
-            width: 100%;
-            max-width: 650px;
-            aspect-ratio: 1 / 1;
-            border: 3px solid var(--gold-main);
-            background-color: #222;
-            box-shadow: 0 30px 80px rgba(0,0,0,1);
+            width: 100%; max-width: 650px; aspect-ratio: 1 / 1;
+            border: 3px solid var(--silver-mid);
+            outline: 8px solid var(--metal-frame);
+            outline-offset: 4px;
+            background-color: var(--metal-frame);
+            box-shadow: 0 40px 100px rgba(0,0,0,1);
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            grid-template-rows: repeat(7, 1fr);
+            grid-template-columns: repeat(7, 1fr); /* 7열 동일 크기 */
+            grid-template-rows: repeat(7, 1fr);    /* 7행 동일 크기 (추가됨) */
             gap: 2px;
-            padding: 4px;
-            border-radius: 4px;
+            padding: 2px; border-radius: 2px;
         }
 
-        /* 개별 셀 스타일 */
+        /* 개별 셀: 정사각형 유지 */
         .grid-cell {
-            background-color: var(--cell-bg-hidden);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-            border: 1px solid rgba(197, 160, 89, 0.1);
-            overflow: hidden;
-            position: relative;
+            background-color: var(--grid-bg);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            border: 1px solid rgba(255, 255, 255, 0.02);
+            position: relative; overflow: hidden;
+            aspect-ratio: 1 / 1; /* 정사각형 강제 */
+            min-width: 0; min-height: 0; /* 콘텐츠 넘침 방지 */
         }
 
-        .grid-cell:hover {
-            border-color: var(--gold-main);
-            background-color: #1a1a1a;
+        .grid-cell:not(.reveal):hover {
+            background-color: #1a1918;
+            border-color: var(--silver-dark);
         }
 
-        /* 셀 내부 콘텐츠 (숫자 또는 이미지) */
         .cell-content {
-            opacity: 0; /* 기본적으로 숨김 */
-            transition: opacity 0.4s ease-in-out;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
+            opacity: 0; transition: opacity 0.6s ease;
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* 숫자 스타일 */
         .cell-text {
             font-family: 'Space Mono', monospace;
-            font-size: 1.8rem;
-            font-weight: bold;
-            color: var(--gold-main);
+            font-size: 1.8rem; font-weight: bold; color: var(--silver-light);
         }
 
-        /* 이미지 스타일 */
+        /* 이미지 스타일: 필터 약하게 조정 */
         .cell-image {
-            max-width: 70%;
-            max-height: 70%;
-            object-fit: contain;
-            filter: sepia(1) hue-rotate(10deg) brightness(0.9); /* 호텔 톤앤매너 필터 */
+            max-width: 80%; max-height: 80%; object-fit: contain;
+            /* 흑백 제거, 약한 세피아와 대비만 적용하여 색상 보존 */
+            filter: contrast(1.05) brightness(1.0) sepia(0.2);
+            transition: filter 0.3s ease;
         }
 
-        /* === 공개된(Revealed) 상태 === */
+        /* 공개된 상태: 다시 숨길 수 없음 & 이미지 선명하게 */
         .grid-cell.reveal {
-            background-color: var(--cell-bg-reveal);
-            border: 1px solid var(--gold-main);
-            box-shadow: inset 0 0 20px rgba(197, 160, 89, 0.4);
+            background: linear-gradient(145deg, #11100f, #1a1918);
+            border: 1px solid var(--silver-mid);
+            cursor: default;
         }
 
-        /* 공개된 상태일 때 콘텐츠 보이기 */
-        .grid-cell.reveal .cell-content {
-            opacity: 1;
+        .grid-cell.reveal .cell-content { opacity: 1; }
+        
+        /* 공개 시 필터를 제거하여 원래 색상을 완전히 보여줌 */
+        .grid-cell.reveal .cell-image {
+            filter: contrast(1.1) brightness(1.05) sepia(0);
         }
-
+        
         @media (max-width: 480px) {
-            h1 { font-size: 1.6rem; letter-spacing: 6px; }
+            h1 { font-size: 1.4rem; letter-spacing: 6px; }
+            .grid-frame { outline-width: 4px; }
             .cell-text { font-size: 1.2rem; }
-            .grid-frame { padding: 2px; gap: 1px; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>THE PENTHOUSE</h1>
-    </header>
+    <h1>THE PENTHOUSE</h1>
 
-    <div class="grid-frame" id="masterGrid">
-        </div>
+    <div class="grid-frame" id="masterGrid"></div>
 
     <script>
         const gridContainer = document.getElementById('masterGrid');
 
-        // --- 그리드 데이터 설정 (49개 아이템) ---
-        // type: 'text' (숫자) 또는 'image' (그림)
-        // content: 표시할 숫자 문자열 또는 이미지 URL
-        // initialReveal: true면 처음부터 보임, false면 클릭해야 보임
         const gridData = [
-            // Row 1
-            { type: 'image', content: 'https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768369367656/pado.png', initialReveal: true },
-            { type: 'image', content: 'https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768369367656/dodo.png', initialReveal: true }, 
+            { type: 'image', content: 'https://amplnet.github.io/hotel/pado.png', initialReveal: true },
+            { type: 'image', content: 'https://amplnet.github.io/hotel/dodo.png', initialReveal: true }, 
             { type: 'text', content: '1', initialReveal: true },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            // Row 2
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '5', initialReveal: false }, 
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '7', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-                        // Row 3
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'image', content: 'https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768369367656/domi.png', initialReveal: true }, 
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'image', content: 'https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768369367656/remi.png', initialReveal: true }, 
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-                    // Row 4
-            { type: 'image', content: 'https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768369367656/papa.png', initialReveal: true }, 
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '6', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-                    // Row 5
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '3', initialReveal: false },
-            { type: 'image', content: 'https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768369367656/solsol.png', initialReveal: true }, 
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '4', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },         
-                    // Row 6
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'image', content: 'https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768369367656/solar.png', initialReveal: true }, 
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'image', content: 'https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768369367656/mira.png', initialReveal: true }, 
-            { type: 'text', content: '2', initialReveal: false },      
-                    // Row 7
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'image', content: 'https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768369367656/dosi.png', initialReveal: true }, 
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },
-            { type: 'text', content: '', initialReveal: false },    
-   
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '5', initialReveal: false }, 
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '7', initialReveal: false },
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'image', content: 'https://amplnet.github.io/hotel/domi.png', initialReveal: true }, 
+            { type: 'text', content: '', initialReveal: false }, { type: 'image', content: 'https://amplnet.github.io/hotel/remi.png', initialReveal: true }, 
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'text', content: '', initialReveal: false }, { type: 'image', content: 'https://amplnet.github.io/hotel/papa.png', initialReveal: true }, 
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'text', content: '6', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '3', initialReveal: false },
+            { type: 'image', content: 'https://amplnet.github.io/hotel/solsol.png', initialReveal: true }, 
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'text', content: '4', initialReveal: false }, { type: 'text', content: '', initialReveal: false },          
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'image', content: 'https://amplnet.github.io/hotel/solar.png', initialReveal: true }, 
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'image', content: 'https://amplnet.github.io/hotel/mira.png', initialReveal: true }, 
+            { type: 'text', content: '2', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'image', content: 'https://amplnet.github.io/hotel/dosi.png', initialReveal: true }, 
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },
+            { type: 'text', content: '', initialReveal: false }, { type: 'text', content: '', initialReveal: false },    
             { type: 'image', content: 'https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768369367656/sisi.png', initialReveal: true }, 
         ];
 
-
-        // 그리드 생성 함수
         function createGrid() {
-            gridContainer.innerHTML = ''; // 초기화
-
-            gridData.forEach((data, index) => {
+            gridContainer.innerHTML = '';
+            gridData.forEach((data) => {
                 const cell = document.createElement('div');
                 cell.classList.add('grid-cell');
-
-                // 1. 콘텐츠 요소 생성 (텍스트 vs 이미지)
                 let contentElement;
                 if (data.type === 'image') {
                     contentElement = document.createElement('img');
@@ -221,26 +163,18 @@
                     contentElement.textContent = data.content;
                     contentElement.classList.add('cell-content', 'cell-text');
                 }
-
                 cell.appendChild(contentElement);
+                if (data.initialReveal) cell.classList.add('reveal');
 
-                // 2. 초기 공개 상태 설정
-                if (data.initialReveal) {
-                    cell.classList.add('reveal');
-                }
-
-                // 3. 클릭 이벤트 (토글)
+                // 클릭 시 영구 공개 (toggle -> add)
                 cell.addEventListener('click', () => {
-                    cell.classList.toggle('reveal');
+                    cell.classList.add('reveal');
                 });
 
                 gridContainer.appendChild(cell);
             });
         }
-
-        // 실행
         createGrid();
-
     </script>
 </body>
 </html>
