@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labyrinth Hotel - Precision Map</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #120f0c;
+            --gold-highlight: rgba(177, 140, 69, 0.4);
+            --gold-border: #c5a059;
+            --font-title: 'Cormorant Garamond', serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 40px 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-family: var(--font-title);
+            color: var(--gold-border);
+            font-size: 2.2rem;
+            letter-spacing: 6px;
+            margin: 0;
+            text-transform: uppercase;
+            text-shadow: 0 0 10px rgba(197, 160, 89, 0.2);
+        }
+
+        /* 지도 컨테이너: 1083x414 비율 유지 */
+        .map-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 1083px;
+            aspect-ratio: 1083 / 414;
+            background-image: url('https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1767592282579/map.png'); /* 이미지 파일명 확인 */
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
+            border: 1px solid #3d3124;
+        }
+
+        /* --- 정밀 그리드 좌표 설정 (11행 7열) --- 
+           시작 (37, 31) -> top: 7.488%, left: 3.416%
+           끝 (1049, 380) -> width: 93.444%, height: 84.300% (상대값 계산)
+        */
+        .map-grid {
+            position: absolute;
+            top: 7.488%;    /* (31 / 414) * 100 */
+            left: 3.416%;   /* (37 / 1083) * 100 */
+            width: 93.444%; /* ((1049 - 37) / 1083) * 100 */
+            height: 84.300%;/* ((380 - 31) / 414) * 100 */
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            grid-template-rows: repeat(11, 1fr);
+            z-index: 10;
+        }
+
+        .map-cell {
+            cursor: pointer;
+            transition: all 0.3s ease-out;
+            border: 0.5px solid rgba(197, 160, 89, 0.05); /* 미세한 가이드 라인 */
+        }
+
+        .map-cell:hover {
+            background-color: rgba(255, 255, 255, 0.03);
+        }
+
+        /* 클릭 활성화 시 효과 */
+        .map-cell.active {
+            background-color: var(--gold-highlight);
+            border: 1.5px solid var(--gold-border);
+            box-shadow: inset 0 0 20px rgba(197, 160, 89, 0.6);
+            z-index: 11;
+        }
+
+        footer {
+            margin-top: 25px;
+            font-family: 'Space Mono', monospace;
+            color: #5a4b3d;
+            font-size: 0.75rem;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.6rem; letter-spacing: 3px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>MAP OF THE LABYRINTH</h1>
+    </header>
+
+    <div class="map-wrapper">
+        <div class="map-grid" id="mapGrid"></div>
+    </div>
+
+    <footer>
+        Click to Find Your Room
+    </footer>
+
+    <script>
+        const grid = document.getElementById('mapGrid');
+        const COLS = 7;
+        const ROWS = 11;
+
+        // 77개의 정밀 셀 생성
+        for (let i = 0; i < COLS * ROWS; i++) {
+            const cell = document.createElement('div');
+            cell.classList.add('map-cell');
+            
+            cell.addEventListener('click', () => {
+                cell.classList.toggle('active');
+            });
+
+            grid.appendChild(cell);
+        }
+    </script>
+
+</body>
+</html>
