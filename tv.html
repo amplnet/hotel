@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Labyrinth Hotel - Animated Media Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-deep: #050505;
+            --gold-primary: #c5a059;
+            --cabinet-dark: #121212;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            background-image: radial-gradient(circle at 2px 2px, rgba(197, 160, 89, 0.05) 1px, transparent 0);
+            background-size: 40px 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        /* === TV 전체 캐비닛 === */
+        .tv-cabinet {
+            width: 960px;
+            height: 780px;
+            background: var(--cabinet-dark);
+            border-radius: 10px;
+            border: 2px solid var(--gold-primary);
+            box-shadow: 0 30px 100px rgba(0,0,0,1);
+            padding: 50px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* === 스크린 영역 (스크롤바 완전 제거) === */
+        .screen-bezel {
+            width: 100%;
+            flex-grow: 1;
+            background-color: #000;
+            border-radius: 4px;
+            border: 1px solid #222;
+            box-shadow: inset 0 0 50px #000;
+            position: relative;
+            overflow: hidden; /* 스크롤바 방지 */
+            margin-bottom: 40px;
+        }
+
+        /* 애니메이션이 적용될 이미지 태그 */
+        #tv-screen-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 비율 유지하며 화면에 맞춤 */
+            display: block;
+            transition: opacity 0.5s ease;
+        }
+
+        /* 채널 전환 애니메이션 클래스 */
+        .tv-transition {
+            animation: screen-warmup 0.8s ease-out forwards;
+        }
+
+        @keyframes screen-warmup {
+            0% {
+                opacity: 0;
+                filter: brightness(3) blur(10px) contrast(200%);
+                transform: scale(1.05);
+            }
+            100% {
+                opacity: 1;
+                filter: brightness(1) blur(0) contrast(110%);
+                transform: scale(1);
+            }
+        }
+
+        /* === CRT & Glass 효과 오버레이 === */
+        .crt-overlay {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, transparent 40%, rgba(0,0,0,0.2) 100%);
+            z-index: 2;
+        }
+
+        /* === 하단 컨트롤 패널 === */
+        .controls-panel {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+            background: linear-gradient(to bottom, #1a1a1a, #0a0a0a);
+            border-top: 1px solid var(--gold-primary);
+        }
+
+        .channel-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 150px;
+            height: 45px;
+            background: transparent;
+            border: 1px solid var(--gold-primary);
+            color: var(--gold-primary);
+            font-family: 'Space Mono', monospace;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .channel-btn:hover {
+            background: var(--gold-primary);
+            color: var(--bg-deep);
+            box-shadow: 0 0 15px rgba(197, 160, 89, 0.4);
+        }
+
+        .channel-btn:active {
+            transform: scale(0.95);
+        }
+
+        .hotel-label {
+            position: absolute;
+            bottom: 12px;
+            right: 50px;
+            color: rgba(197, 160, 89, 0.3);
+            font-family: 'Space Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="tv-cabinet">
+        <div class="screen-bezel">
+            <img id="tv-screen-img" src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1767764881844/k4.png" alt="TV Screen">
+            <div class="crt-overlay"></div>
+        </div>
+
+        <div class="controls-panel">
+            <button onclick="changeChannel('https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1767764641281/111.png')" class="channel-btn">T B S</button>
+            <button onclick="changeChannel('https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1767764641281/222.png')" class="channel-btn">M B N</button>
+            <button onclick="changeChannel('https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1767764641281/33.png')" class="channel-btn">K N N</button>
+            <button onclick="changeChannel('https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1767764881844/k4.png')" class="channel-btn">K M T V</button>
+        </div>
+
+        <div class="hotel-label">LABYRINTH HOTEL MEDIA SUITE</div>
+    </div>
+
+    <script>
+        function changeChannel(src) {
+            const screenImg = document.getElementById('tv-screen-img');
+            
+            // 1. 기존 애니메이션 클래스 제거
+            screenImg.classList.remove('tv-transition');
+            
+            // 2. 브라우저가 변화를 감지하도록 강제 리플로우(Reflow)
+            void screenImg.offsetWidth;
+            
+            // 3. 이미지 소스 변경 및 애니메이션 클래스 추가
+            screenImg.src = src;
+            screenImg.classList.add('tv-transition');
+        }
+    </script>
+
+</body>
+</html>
