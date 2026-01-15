@@ -4,6 +4,32 @@
     <meta charset="UTF-8">
     <title>Labyrinth Hotel | Airport Terminal</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
+    <script>
+    // 1. 마우스 우클릭 차단
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+    }, false);
+
+    // 2. 단축키 차단 (F12, 소스보기, 개발자 도구)
+    document.addEventListener('keydown', function(e) {
+        // F12 막기
+        if (e.key === "F12") {
+            e.preventDefault();
+        }
+        // Ctrl+U (소스 보기) 막기
+        if (e.ctrlKey && e.key === 'u') {
+            e.preventDefault();
+        }
+        // Ctrl+Shift+I / Ctrl+Shift+J (개발자 도구) 막기
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) {
+            e.preventDefault();
+        }
+        // Ctrl+S (저장) 막기
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+        }
+    }, false);
+</script>
     <style>
         /* [1. 기본 테마 및 커서] */
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
