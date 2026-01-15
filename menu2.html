@@ -31,6 +31,36 @@
     }, false);
 </script>
     <style>
+                   @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Noto+Serif+KR:wght@300;600&family=Space+Mono&display=swap');
+    <html lang="ko">
+.hotel-support-banner {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.gold-border {
+  display: inline-block;
+  padding: 8px 16px;
+  color: #c5a059; /* 빛바랜 금색 */
+  text-decoration: none;
+  font-family: 'Noto Serif KR', serif;
+  font-size: 0.9rem;
+  border: 1px solid #c5a059;
+  background: rgba(20, 20, 20, 0.8); /* 어두운 배경 */
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.gold-border:hover {
+  background: #c5a059;
+  color: #1a1a1a;
+  box-shadow: 0 0 10px rgba(197, 160, 89, 0.4);
+}
+
+.gold-border .icon {
+  margin-right: 5px;
+  font-size: 0.8rem;
+}
         /* [기본 테마 설정] */
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
         body {
@@ -115,7 +145,11 @@
 <body oncontextmenu="return false" onselectstart="return false">
     <div class="cursor"></div>
     <div class="vignette"></div>
-
+    <div class="hotel-support-banner">
+  <a href="https://amplnet.github.io/hotel/menu2.html" target="_blank" class="hotel-link gold-border">
+    <span class="icon">✉</span> 모바일 앱에서 안 보이는 경우 클릭
+  </a>
+</div></br>
     <h1 class="main-title">DAILY MENU</h1>
     <h2 class="sub-title">DINNER</h2>
 
