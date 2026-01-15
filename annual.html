@@ -159,6 +159,9 @@
     <footer>LABYRINTH HOTEL ADMINISTRATION // SECURITY SECTOR</footer>
 
     <script>
+                document.onkeydown = function(e) {
+            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false;
+        };
         const rotateGroup = document.getElementById('rotatable-group');
         const dateDisplay = document.getElementById('current-date-info');
         
