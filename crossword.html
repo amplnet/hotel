@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labyrinth Hotel - Final Cipher (Fix v2)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Noto+Serif+KR:wght@400;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #1a1a1b;
+            --silver-dark: #7a7a7a;
+            --silver-mid: #b0b0b0;
+            --silver-bright: #e0e0e0;
+            --cell-active: #2d2d2e;
+            --metal-border: #4a4a4b;
+            --correct-bg: #d1d1d1;
+            --correct-text: #0a0a0a;
+            --highlight-pink: rgba(255, 182, 193, 0.5);
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--silver-bright);
+            font-family: 'Noto Serif KR', serif;
+            margin: 0; padding: 40px 10px;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.5rem; letter-spacing: 12px;
+            background: linear-gradient(to bottom, var(--silver-bright), var(--silver-dark));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 50px; text-align: center;
+        }
+
+        .grid-frame {
+            display: grid;
+            grid-template-columns: repeat(25, 40px);
+            grid-template-rows: repeat(20, 40px);
+            gap: 2px; background-color: var(--metal-border);
+            padding: 10px; border: 4px solid var(--silver-dark);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.6);
+        }
+
+        .cell {
+            width: 40px; height: 40px;
+            background-color: transparent;
+            display: flex; align-items: center; justify-content: center;
+            position: relative;
+        }
+
+        .cell.active { background-color: var(--cell-active); cursor: pointer; }
+        .cell.active:hover { background-color: #3d3d3f; }
+
+        .index {
+            position: absolute; top: 1px; left: 3px;
+            font-size: 1rem; color: var(--silver-mid); font-weight: bold;
+        }
+
+        .letter {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.3rem; font-weight: bold;
+            opacity: 0; transition: opacity 0.4s ease;
+        }
+
+        .cell.revealed { background: var(--correct-bg) !important; }
+        .cell.revealed .letter { opacity: 1; color: var(--correct-text); }
+
+        .cell.special-highlight {
+            background-color: var(--highlight-pink) !important;
+            box-shadow: inset 0 0 8px rgba(255,192,203,0.5);
+        }
+
+        .clues-wrapper {
+            margin-top: 40px; display: grid; grid-template-columns: 1fr 1fr;
+            gap: 50px; width: 100%; max-width: 950px;
+            background: rgba(255,255,255,0.03); padding: 30px;
+        }
+        .clue-group h2 { font-family: 'Cinzel', serif; border-bottom: 2px solid var(--silver-dark); padding-bottom: 10px; }
+        .clue-item { margin: 12px 0; font-size: 0.95rem; color: #ccc; }
+    </style>
+</head>
+<body>
+
+    <h1>Labyrinth Hotel</h1>
+
+    <div class="grid-frame" id="grid"></div>
+
+    <div class="clues-wrapper">
+        <div class="clue-group">
+            <h2>Across</h2>
+            <div class="clue-item">2. </div>
+            <div class="clue-item">3. </div>
+            <div class="clue-item">4. </div>
+            <div class="clue-item">5. </div>
+            <div class="clue-item">6. </div>
+            <div class="clue-item">7. </div>
+        </div>
+        <div class="clue-group">
+            <h2>Down</h2>
+            <div class="clue-item">2. </div>
+            <div class="clue-item">3. </div>
+            <div class="clue-item">4. </div>
+            <div class="clue-item">5. </div>
+            <div class="clue-item">6. </div>
+            <div class="clue-item">7. </div>
+        </div>
+    </div>
+
+    <script>
+        const puzzleWords = [
+            // Across
+            { word: "SYNCHRONIZATION", r: 2, c: 0, dir: 'A', id: '2' },
+            { word: "COLORLESS", r: 3, c: 5, dir: 'A', id: '3' },
+            { word: "CARTOGRAPHER", r: 5, c: 9, dir: 'A', id: '7' },
+            { word: "IMPROVISATION", r: 6, c: 9, dir: 'A', id: '6' },
+            { word: "VERIFICATION", r: 9, c: 7, dir: 'A', id: '4' },
+            { word: "CONFECTIONERY", r: 10, c: 9, dir: 'A', id: '5' },
+            
+            // Down
+            { word: "GASTRONOMIES", r: 0, c: 0, dir: 'D', id: '4' },
+            { word: "ENTERTAINMENT", r: 1, c: 2, dir: 'D', id: '7' },
+            { word: "ARCHITECTURE", r: 1, c: 5, dir: 'D', id: '6' },
+            { word: "AMALGAMATION", r: 0, c: 10, dir: 'D', id: '5' },
+            { word: "FRAGRANCES", r: 10, c: 12, dir: 'D', id: '2' },
+            { word: "REASONABLE", r: 10, c: 20, dir: 'D', id: '3' }
+        ];
+
+        // 이미지 기반 정밀 하이라이트 좌표
+        const highlightCoords = [
+            "0-0",  // G
+            "7-2", // A
+            "10-2", // M
+            "7-5", // E 
+            "5-9", // C 
+            "3-10",  // L 
+            "10-13", // E 
+            "6-17", // A 
+            "10-20",// R 
+        ];
+
+        const gridElement = document.getElementById('grid');
+        const cellMap = {};
+
+        puzzleWords.forEach(wordData => {
+            for (let i = 0; i < wordData.word.length; i++) {
+                const r = wordData.dir === 'A' ? wordData.r : wordData.r + i;
+                const c = wordData.dir === 'A' ? wordData.c + i : wordData.c;
+                const key = `${r}-${c}`;
+                
+                if (!cellMap[key]) {
+                    cellMap[key] = { char: wordData.word[i], indices: [], words: [] };
+                }
+                if (i === 0) cellMap[key].indices.push(wordData.id);
+                cellMap[key].words.push(wordData);
+            }
+        });
+
+        for (let r = 0; r < 20; r++) {
+            for (let c = 0; c < 25; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                const key = `${r}-${c}`;
+                const data = cellMap[key];
+
+                if (highlightCoords.includes(key)) cell.classList.add('special-highlight');
+
+                if (data) {
+                    cell.classList.add('active');
+                    cell.id = `cell-${r}-${c}`;
+                    if (data.indices.length > 0) {
+                        const idx = document.createElement('span');
+                        idx.className = 'index';
+                        idx.textContent = data.indices[0];
+                        cell.appendChild(idx);
+                    }
+                    const letter = document.createElement('span');
+                    letter.className = 'letter';
+                    letter.textContent = data.char;
+                    cell.appendChild(letter);
+
+                    cell.onclick = () => {
+                        const input = prompt(`단어를 입력하세요:`);
+                        if (!input) return;
+                        const upperInput = input.trim().toUpperCase();
+                        
+                        // 현재 칸을 포함하는 단어들 중 정답이 있는지 확인
+                        const matchedWord = data.words.find(w => w.word === upperInput);
+                        if (matchedWord) {
+                            revealWord(matchedWord);
+                        } else {
+                            alert("오답입니다!");
+                        }
+                    };
+                }
+                gridElement.appendChild(cell);
+            }
+        }
+
+        function revealWord(w) {
+            for (let i = 0; i < w.word.length; i++) {
+                const r = w.dir === 'A' ? w.r : w.r + i;
+                const c = w.dir === 'A' ? w.c + i : w.c;
+                const target = document.getElementById(`cell-${r}-${c}`);
+                if (target) target.classList.add('revealed');
+            }
+        }
+    </script>
+</body>
+</html>
