@@ -4,63 +4,9 @@
     <meta charset="UTF-8">
     <title>Labyrinth Hotel | Rhythm Puzzle</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
-    <script>
-    // 1. 마우스 우클릭 차단
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-    }, false);
-
-    // 2. 단축키 차단 (F12, 소스보기, 개발자 도구)
-    document.addEventListener('keydown', function(e) {
-        // F12 막기
-        if (e.key === "F12") {
-            e.preventDefault();
-        }
-        // Ctrl+U (소스 보기) 막기
-        if (e.ctrlKey && e.key === 'u') {
-            e.preventDefault();
-        }
-        // Ctrl+Shift+I / Ctrl+Shift+J (개발자 도구) 막기
-        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j')) {
-            e.preventDefault();
-        }
-        // Ctrl+S (저장) 막기
-        if (e.ctrlKey && e.key === 's') {
-            e.preventDefault();
-        }
-    }, false);
-</script>
     <style>
-            @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Noto+Serif+KR:wght@300;600&family=Space+Mono&display=swap');
-    <html lang="ko">
-.hotel-support-banner {
-  text-align: center;
-  margin-bottom: 20px;
-}
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Noto+Serif+KR:wght@300;600&family=Space+Mono&display=swap');
 
-.gold-border {
-  display: inline-block;
-  padding: 8px 16px;
-  color: #c5a059; /* 빛바랜 금색 */
-  text-decoration: none;
-  font-family: 'Noto Serif KR', serif;
-  font-size: 0.9rem;
-  border: 1px solid #c5a059;
-  background: rgba(20, 20, 20, 0.8); /* 어두운 배경 */
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
-}
-
-.gold-border:hover {
-  background: #c5a059;
-  color: #1a1a1a;
-  box-shadow: 0 0 10px rgba(197, 160, 89, 0.4);
-}
-
-.gold-border .icon {
-  margin-right: 5px;
-  font-size: 0.8rem;
-}
         /* [1. 기본 테마 및 커서] */
         * { margin: 0; padding: 0; box-sizing: border-box; cursor: none; }
         body {
@@ -75,47 +21,50 @@
 
         /* [2. 액자 프레임 디자인] */
         .puzzle-frame {
-            position: relative; width: 1000px; padding: 50px;
+            position: relative; width: 1000px; padding: 60px 50px;
             background: #0a0a0a;
-            border: 2px solid #2a1f10; /* 골드 프레임 */
+            border: 2px solid #2a1f10; 
             box-shadow: 0 0 100px rgba(0,0,0,1), inset 0 0 50px rgba(139, 0, 0, 0.1);
             border-radius: 2px;
             text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .header-title {
             font-family: 'Cinzel', serif; font-size: 1.8rem;
-            letter-spacing: 10px; margin-bottom: 40px;
+            letter-spacing: 10px; margin-bottom: 60px; /* 제목과 첫 섹션 사이 간격 */
             text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
         }
 
-        /* [3. 리듬 그리드 레이아웃] */
+        /* [3. 리듬 섹션 레이아웃] */
         .rhythm-section {
             display: flex; align-items: center; justify-content: center;
-            margin-bottom: 30px; gap: 20px;
+            margin-bottom: 50px; /* 바이올린과 기타 섹션 사이의 간격을 벌림 */
+            gap: 30px;
         }
+        
+        /* 마지막 섹션은 여백 제거 */
+        .rhythm-section:last-of-type { margin-bottom: 0; }
 
-        /* 아이콘 이미지 스타일 */
         .instrument-icon { width: 100px; height: auto; object-fit: contain; filter: drop-shadow(0 0 5px rgba(212, 175, 55, 0.3)); }
 
         .grid-container {
             display: grid; border: 1px solid #332a1b; background: rgba(255,255,255,0.02);
         }
 
-        /* *** 핵심 변경: 두 그리드의 가로 길이 통일 *** */
-        /* 상단(7열), 하단(5열) 모두 셀 너비를 동일하게 맞추고 열 개수를 통일 */
         .violin-grid, .guitar-grid {
-            grid-template-columns: repeat(6, 65px); /* 7열 기준, 셀 너비 65px 통일 */
-            grid-template-rows: repeat(4, 65px);    /* 높이 기준 통일 */
+            grid-template-columns: repeat(6, 65px); 
         }
-        /* 상단 그리드는 높이만 2행으로 재조정 */
         .violin-grid { grid-template-rows: repeat(2, 65px); }
+        .guitar-grid { grid-template-rows: repeat(4, 65px); }
 
         .cell {
             border: 1px solid #222; display: flex; align-items: center; justify-content: center;
             font-size: 1.8rem; transition: 0.3s;
         }
-        .cell.empty { background: rgba(0,0,0,0.3); border-color: transparent; } /* 빈 셀 스타일 */
+        .cell.empty { background: rgba(0,0,0,0.3); border-color: transparent; }
         .cell:not(.empty):hover { background: rgba(139, 0, 0, 0.2); }
 
         .equals-sign { font-size: 2rem; color: #444; margin: 0 15px; }
@@ -124,34 +73,23 @@
             display: flex; align-items: center; justify-content: center; font-size: 2.5rem;
         }
 
-        /* [4. 정답 입력창] */
-        .answer-zone { margin-top: 30px; }
-        input {
-            background: transparent; border: none; border-bottom: 2px solid #332211;
-            color: #d4af37; font-family: 'Cinzel'; font-size: 1.5rem;
-            text-align: center; width: 300px; outline: none; letter-spacing: 5px;
-            transition: 0.5s;
-        }
-        input:focus { border-color: #8b0000; text-shadow: 0 0 10px #8b0000; }
-
         .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 300px #000; pointer-events: none; z-index: 100; }
     </style>
 </head>
-<body oncontextmenu="return false">
+<body>
 
     <div class="cursor"></div>
     <div class="cursor-follower"></div>
     <div class="vignette"></div>
 
-
-</br>
+    <div class="puzzle-frame">
         <h2 class="header-title">SAY THE LETTER ON STRINGS?</h2>
 
         <div class="rhythm-section">
             <img src="https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768286099441/violin.png" class="instrument-icon" alt="Violin">
             <div class="grid-container violin-grid">
                 <div class="cell">🐔</div><div class="cell">🐎</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐎</div><div class="cell">🐎</div>
-                <div class="cell">🐎</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐎</div><div class="cell"></div>
+                <div class="cell">🐎</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐔</div><div class="cell">🐎</div>
             </div>
             <div class="equals-sign">=</div>
             <div class="result-box">🧊</div>
@@ -168,22 +106,28 @@
             <div class="equals-sign">=</div>
             <div class="result-box" id="final-result" style="color:#8b0000">?</div>
         </div>
-
     </div>
 
     <script>
-        /* [보안 설정] */
-        document.onkeydown = function(e) {
-            if(event.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false;
-        };
-
-        /* [커서 로직] */
-        const cursor = document.querySelector('.cursor'), follower = document.querySelector('.cursor-follower');
-        document.addEventListener('mousemove', e => {
-            cursor.style.left = e.clientX + 'px'; cursor.style.top = e.clientY + 'px';
-            setTimeout(() => { follower.style.left = e.clientX - 16 + 'px'; follower.style.top = e.clientY - 16 + 'px'; }, 50);
+        // 보안 및 커서 로직
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        
+        document.addEventListener('keydown', e => {
+            if (e.key === "F12" || (e.ctrlKey && (e.key === 'u' || e.key === 'i' || e.key === 'j' || e.key === 's'))) {
+                e.preventDefault();
+            }
         });
 
+        const cursor = document.querySelector('.cursor');
+        const follower = document.querySelector('.cursor-follower');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            setTimeout(() => {
+                follower.style.left = e.clientX - 16 + 'px';
+                follower.style.top = e.clientY - 16 + 'px';
+            }, 50);
+        });
     </script>
 </body>
 </html>
