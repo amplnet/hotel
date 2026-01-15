@@ -177,7 +177,7 @@
                 <div class="directory-tag"><span class="en">Kid's Room / Spa</span><span class="ko">키즈룸 / 스파</span></div>
             </div>
             <div class="floor-row">
-                <button class="btn-elevator" onclick="handleFloor(this)">G</button>
+                <button class="btn-elevator" onclick="handleFloor(this)"><span class="hidden-trigger" onclick="triggerOutElevator()">G</span></button>
                 <div class="directory-tag"><span class="en">Ground Floor</span><span class="ko">지상층</span></div>
             </div>
         </div>
@@ -201,20 +201,30 @@
             setTimeout(() => {
                 panel.classList.remove('apply-shake');
                 
-                display.innerText = "THANK YOU FOR PLAYING!";
+                display.innerText = "Nope.";
                 display.classList.add('show');
 
-                // 3. 코드 노출 1초 후 페이지 이동
-                setTimeout(() => {
-                    try {
-                        if (window.parent && window.parent.goNextPage) {
-                            window.parent.goNextPage('checkinwaiting');
-                        } else {
-                            window.parent.location.href = "javascript:goNextPage('checkinwaiting');";
-                        }
-                    } catch (e) { console.error("Navigation failed:", e); }
-                }, 1000);
+
             }, 500);
+
+        }
+                function triggerOutElevator() {
+            const panel = document.getElementById('mainPanel');
+            const display = document.getElementById('access-display');
+
+            // 1. 패널에 흔들림 애니메이션 클래스 추가
+            panel.classList.add('apply-shake');
+
+            // 2. 0.5초(흔들림 시간) 후에 클래스 제거 및 코드 노출
+            setTimeout(() => {
+                panel.classList.remove('apply-shake');
+                
+                display.innerText = "Type : Thank You For Playing!";
+                display.classList.add('show');
+
+
+            }, 500);
+
         }
 
         const cursor = document.querySelector('.cursor');
