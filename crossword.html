@@ -136,6 +136,29 @@
         }
         .clue-group h2 { font-family: 'Cinzel', serif; border-bottom: 2px solid var(--silver-dark); padding-bottom: 10px; }
         .clue-item { margin: 12px 0; font-size: 0.95rem; color: #ccc; }
+        /* 리셋 버튼 스타일 */
+    .control-panel {
+        margin-top: 30px;
+        margin-bottom: 20px;
+    }
+
+    .hotel-btn {
+        background: transparent;
+        color: #8c8883;
+        border: 1px solid #5a5550;
+        padding: 10px 25px;
+        font-family: 'Cinzel', serif;
+        cursor: pointer;
+        letter-spacing: 2px;
+        transition: all 0.4s ease;
+        font-size: 0.8rem;
+    }
+
+    .hotel-btn:hover {
+        background: #c5a059;
+        color: #1a1a1a;
+        box-shadow: 0 0 15px rgba(197, 160, 89, 0.3);
+    }
     </style>
 </head>
 <body>
@@ -147,7 +170,9 @@
     <h1>Labyrinth Hotel</h1>
 
     <div class="grid-frame" id="grid"></div>
-
+<div class="control-panel">
+    <button onclick="resetGrid()" class="hotel-btn">RESEAL THE PUZZLE (전체 초기화)</button>
+</div>
     <div class="clues-wrapper">
         <div class="clue-group">
             <h2>Across</h2>
@@ -260,7 +285,92 @@
             }
         }
     }
+    // ... (이전 puzzleWords, highlightCoords 설정 동일) ...
+
+    function drawGrid() {
+        gridElement.innerHTML = ''; // 초기화 후 다시 그리기 위해
+        for (let r = 0; r < 20; r++) {
+            for (let c = 0; c < 25; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                const key = `${r}-${c}`;
+                const data = cellMap[key];
+
+                if (highlightCoords.includes(key)) cell.classList.add('special-highlight');
+
+                if (data) {
+                    cell.classList.add('active');
+                    cell.id = `cell-${r}-${c}`;
+                    if (data.indices.length > 0) {
+                        const idx = document.createElement('span');
+                        idx.className = 'index';
+                        idx.textContent = data.indices[0];
+                        cell.appendChild(idx);
+                    }
+                    const letter = document.createElement('span');
+                    letter.className = 'letter';
+                    cell.appendChild(letter);
+
+                    cell.onclick = () => {
+                        // 현재 입력된 글자가 있다면 보여주기
+                        const currentText = cell.querySelector('.letter').textContent;
+                        const msg = currentText 
+                            ? `현재 글자: "${currentText}"\n새 단어를 입력하거나, 비우고 확인을 누르면 지워집니다.`
+                            : `단어를 입력하세요 (길이: ${data.words[0].len}):`;
+                            
+                        const input = prompt(msg, currentText);
+                        
+                        // 취소를 누른 경우(null)는 아무 작업 안 함
+                        if (input === null) return;
+                        
+                        const upperInput = input.trim().toUpperCase();
+                        
+                        // 아무것도 입력하지 않고 확인을 누르면 해당 영역 삭제
+                        if (upperInput === "") {
+                            clearWord(data.words[0]);
+                            return;
+                        }
+
+                        // 길이 체크 및 채우기
+                        const targetWord = data.words.find(w => w.len === upperInput.length);
+                        if (targetWord) {
+                            fillWord(targetWord, upperInput);
+                        } else {
+                            alert(`길이가 맞지 않습니다. (필요 길이: ${data.words[0].len})`);
+                        }
+                    };
+                }
+                gridElement.appendChild(cell);
+            }
+        }
+    }
+
+    // 단어 영역을 지우는 함수
+    function clearWord(w) {
+        for (let i = 0; i < w.len; i++) {
+            const r = w.dir === 'A' ? w.r : w.r + i;
+            const c = w.dir === 'A' ? w.c + i : w.c;
+            const target = document.getElementById(`cell-${r}-${c}`);
+            if (target) {
+                target.classList.remove('revealed');
+                target.querySelector('.letter').textContent = '';
+            }
+        }
+    }
+
+    // 전체 그리드를 리셋하는 함수
+    function resetGrid() {
+        if (confirm("입력한 글자들을 모두 초기화하겠습니까?")) {
+            const revealedCells = document.querySelectorAll('.cell.revealed');
+            revealedCells.forEach(cell => {
+                cell.classList.remove('revealed');
+                cell.querySelector('.letter').textContent = '';
+            });
+        }
+    }
+
+    // 초기 실행
+    drawGrid();
 </script>
-    </script>
 </body>
 </html>
