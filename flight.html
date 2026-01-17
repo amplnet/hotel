@@ -212,6 +212,9 @@
 
         // 초기 안내 메시지 표시
         window.onload = () => document.getElementById('display-content').classList.add('show');
+                if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+    window.location.href = "https://amplnet.github.io/hotel/flightm.html";
+}
     </script>
 </body>
 </html>
