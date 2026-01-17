@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Labyrinth Hotel | Airport Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Noto+Serif+KR:wght@300;600&family=Space+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #050505;
+            --gold-main: #d4af37;
+            --gold-dark: #2a1f10;
+            --red-point: #8b0000;
+        }
+
+        /* [1. 기본 모바일 세팅] */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            background-color: var(--bg-color); color: var(--gold-main);
+            font-family: 'Nanum Myeongjo', serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* [2. 메인 구조 - 세로 스택] */
+        .terminal-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        /* 상단 제목 영역 */
+        .mobile-header {
+            padding: 30px 20px 10px;
+            text-align: center;
+            background: linear-gradient(to bottom, #0a0a0a, var(--bg-color));
+        }
+        .header-title { font-family: 'Cinzel', serif; font-size: 1.6rem; letter-spacing: 4px; margin-bottom: 5px; }
+        .sub-title { font-size: 0.8rem; color: #554433; letter-spacing: 1px; }
+
+        /* [3. 지도 영역 - 반응형 비율 유지] */
+        .map-section {
+            position: relative;
+            width: 100%;
+            /* 지도의 가로세로 비율에 맞춰 높이 설정 (seasea.png 비율 기준) */
+            aspect-ratio: 16 / 10; 
+            background-image: url('https://www.thelabyrinth.co.kr/labyrinth/upload/quest/7166/1768291264840/seasea.png');
+            background-size: cover;
+            background-position: center;
+            border-top: 1px solid var(--gold-dark);
+            border-bottom: 1px solid var(--gold-dark);
+            margin: 20px 0;
+            filter: contrast(1.1);
+        }
+
+        /* 터치용 마커 크기 확대 */
+        .marker {
+            position: absolute; width: 24px; height: 24px;
+            background: var(--red-point); border: 2px solid var(--gold-main); border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        .marker::after {
+            content: ''; position: absolute; width: 100%; height: 100%;
+            border: 1px solid var(--red-point); border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+
+        /* 마커 좌표 (원본 유지) */
+        .m-bangkok { top: 38%; left: 17%; }
+        .m-danang { top: 33%; left: 34%; }
+        .m-manila { top: 36%; left: 59%; }
+        .m-hochiminh { top: 49%; left: 29%; }
+        .m-singapore { top: 77%; left: 23%; }
+        .m-kotakinabalu { top: 64%; left: 47%; }
+
+        /* [4. 정보 하단 패널] */
+        .info-panel {
+            padding: 20px;
+            text-align: center;
+            min-height: 250px;
+        }
+
+        .display-box { opacity: 0; transition: 0.4s; transform: translateY(10px); }
+        .display-box.show { opacity: 1; transform: translateY(0); }
+
+        .city-name { font-family: 'Cinzel', serif; font-size: 1.8rem; color: #fff; margin-bottom: 10px; }
+        .price-tag { font-size: 1.5rem; color: var(--gold-main); margin-bottom: 15px; }
+        .price-old { text-decoration: line-through; opacity: 0.5; font-size: 1.2rem; margin-right: 10px; }
+        .desc-text { font-size: 0.95rem; color: #888; line-height: 1.7; word-break: keep-all; padding: 0 10px; }
+
+        .book-btn {
+            margin-top: 30px; width: 100%; max-width: 250px;
+            padding: 15px; background: transparent;
+            border: 1px solid var(--gold-main); color: var(--gold-main);
+            font-family: 'Cinzel'; font-size: 1.1rem; letter-spacing: 3px;
+            transition: 0.3s;
+        }
+        .book-btn:active { background: var(--gold-main); color: #000; }
+
+        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 150px #000; pointer-events: none; z-index: 1000; }
+
+        /* 지원 배너 모바일 최적화 */
+        .hotel-support-banner { margin-top: 40px; }
+        .gold-border {
+            font-size: 0.75rem; border: 1px solid #c5a059; padding: 10px 20px;
+            color: #c5a059; text-decoration: none;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false" onselectstart="return false">
+
+    <div class="vignette"></div>
+
+    <div class="terminal-container">
+        <header class="mobile-header">
+            <h1 class="header-title">FLIGHT TERMINAL</h1>
+            <p class="sub-title">I'M ADDICTED TO AIRPLANE</p>
+        </header>
+
+        <section class="map-section">
+            <div class="marker m-bangkok" onclick="showInfo('Bangkok')"></div>
+            <div class="marker m-danang" onclick="showInfo('Da Nang')"></div>
+            <div class="marker m-manila" onclick="showInfo('Manila')"></div>
+            <div class="marker m-hochiminh" onclick="showInfo('Ho Chi Minh City')"></div>
+            <div class="marker m-singapore" onclick="showInfo('Singapore')"></div>
+            <div class="marker m-kotakinabalu" onclick="showInfo('Kota Kinabalu')"></div>
+        </section>
+
+        <section class="info-panel">
+            <div id="display-content" class="display-box">
+                <h2 id="target-city" class="city-name">SELECT DESTINATION</h2>
+                <div id="target-price" class="price-tag">---</div>
+                <p id="target-desc" class="desc-text">지도의 붉은 마커를 터치하여 항공권 정보를 확인하십시오.</p>
+                <button class="book-btn">BOOK NOW</button>
+            </div>
+
+
+        </section>
+    </div>
+
+    <script>
+        /* [보안 설정] */
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false;
+        };
+
+        /* [데이터 로직] */
+        const flightData = {
+            'Manila': { price: '$135', old: '', desc: 'Labyrinth Hotel 필리핀 지사로 연결되는 직항 노선입니다.' },
+            'Singapore': { price: '$123', old: '', desc: '가장 빠르고 쾌적한 비즈니스 클래스를 경험하십시오.' },
+            'Da Nang': { price: '→ $121', old: '$141', desc: '다낭 특별 할인이 적용 중입니다. 한정된 좌석만 제공됩니다.' },
+            'Bangkok': { price: '→ $157', old: '$175', desc: '방콕행 야간 비행 편이 준비되어 있습니다.' },
+            'Ho Chi Minh City': { price: 'No Flights', old: '', desc: '현재 해당 지역으로의 운항이 일시적으로 중단되었습니다.' },
+            'Kota Kinabalu': { price: '$ABC → $DEF', old: '', desc: 'ANSWER TYPE : ABCDEF' }
+        };
+
+        function showInfo(city) {
+            const content = document.getElementById('display-content');
+            const data = flightData[city];
+
+            content.classList.remove('show');
+            
+            setTimeout(() => {
+                document.getElementById('target-city').innerText = city.toUpperCase();
+                let priceHTML = data.old ? `<span class="price-old">${data.old}</span>${data.price}` : data.price;
+                document.getElementById('target-price').innerHTML = priceHTML;
+                document.getElementById('target-desc').innerText = data.desc;
+                content.classList.add('show');
+                
+                // 터치 시 정보창으로 부드럽게 스크롤 (선택 사항)
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 200);
+        }
+
+        window.onload = () => document.getElementById('display-content').classList.add('show');
+    </script>
+</body>
+</html>
