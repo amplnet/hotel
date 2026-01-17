@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Labyrinth Hotel - Pantry Suite</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Noto+Serif+KR:wght@300;600&family=Space+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <style>
+        /* == SILVER LUXURY PALETTE (DARK THEME) == */
+        :root {
+            --bg-dark: #050505;        /* 럭셔리 테마를 위해 어두운 배경으로 복구 */
+            --silver-dark: #5a5550;    /* 묵직한 다크 실버 */
+            --silver-mid: #8c8883;     /* 중간 톤 금속 */
+            --silver-light: #b8b4b0;   /* 하이라이트 실버 */
+            --metal-frame: #2a2725;    /* 금속 프레임 테두리 */
+            --text-muted: #999590;     /* 차분한 텍스트 */
+            --grid-bg: #11100f;        /* 셀 배경 */
+            --preview-bg: rgba(184, 180, 176, 0.15); 
+        }
+
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--silver-mid);
+            font-family: 'Cormorant Garamond', 'Noto Serif KR', serif;
+            margin: 0;
+            padding: 40px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        /* 헤더 섹션 */
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            width: 100%;
+            max-width: 500px; /* 모든 기기에서 폭 고정 */
+            border-bottom: 1px solid var(--metal-frame);
+            padding-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.8rem;
+            letter-spacing: 8px;
+            margin: 0;
+            text-transform: uppercase;
+            background: linear-gradient(to bottom, var(--silver-light), var(--silver-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        /* 메인 컨테이너: 화면 사이즈와 관계없이 무조건 수직 배치 */
+        .main-container {
+            display: flex;
+            flex-direction: column; /* 강제 수직 정렬 */
+            gap: 40px;
+            width: 100%;
+            max-width: 500px; /* 데스크탑에서도 모바일 느낌 유지 */
+            align-items: center;
+        }
+
+        /* === 실버 그리드 섹션 === */
+        .crossword-section {
+            width: 100%;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            background-color: var(--metal-frame);
+            border: 5px solid var(--metal-frame);
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.5);
+            border-radius: 4px;
+        }
+
+        .cell {
+            background-color: var(--grid-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            font-family: 'Noto Serif KR', serif;
+            color: #444; 
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        /* 선택 중(미리보기) 상태 */
+        .cell.preview {
+            background-color: var(--preview-bg);
+            color: var(--silver-light);
+        }
+
+        /* 금속 질감 하이라이트(완료 상태) */
+        .cell.highlighted {
+            background: linear-gradient(145deg, var(--silver-dark), var(--silver-mid));
+            color: #050505;
+            font-weight: 700;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.4);
+            text-shadow: 0 1px 1px rgba(255,255,255,0.2);
+        }
+
+        /* === 힌트 리스트 섹션 === */
+        .clues-section {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 35px;
+        }
+
+        .clue-group h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.1rem;
+            color: var(--silver-light);
+            border-bottom: 1px solid var(--metal-frame);
+            margin: 0 0 15px 0;
+            padding-bottom: 8px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            text-align: left;
+        }
+
+        .sortable-list {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+
+        .clue-item {
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            background-color: rgba(20, 18, 16, 0.8);
+            border-left: 3px solid var(--silver-dark);
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            cursor: grab;
+            line-height: 1.6;
+            transition: all 0.2s;
+            word-break: keep-all;
+        }
+
+        .clue-item:hover {
+            border-left-color: var(--silver-light);
+            color: var(--silver-light);
+            background-color: rgba(30, 28, 26, 1);
+        }
+
+        .clue-item font {
+            font-family: 'Space Mono', monospace;
+            color: var(--silver-light) !important;
+            font-weight: bold;
+        }
+
+        .sortable-ghost {
+            opacity: 0.3;
+            background-color: var(--silver-dark);
+        }
+
+        /* 하단 장식 */
+        .footer-deco {
+            margin-top: 60px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            letter-spacing: 4px;
+            color: var(--silver-dark);
+            opacity: 0.5;
+            text-align: center;
+        }
+    </style>
+</head>
+<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
+
+    <header>
+        <h1>Pantry</h1>
+    </header>
+
+    <div class="main-container">
+        <div class="crossword-section">
+            <div class="grid-container" id="grid"></div>
+        </div>
+
+        <div class="clues-section">
+            <div class="clue-group">
+                <h2>Across (Movable)</h2>
+                <ul id="across-list" class="sortable-list">
+                    <li class="clue-item">1<font>O</font>73년 독일, 오스트리아, 러시아 황제 삼국 협정</li>
+                    <li class="clue-item">남<font>O</font> 지방에서 부르는 진양조장단의 잡가</li>
+                    <li class="clue-item">옻<font>O</font>뭇과에 속한 옻나무의 생약명</li>
+                    <li class="clue-item">좁<font>O</font> 그릇에서 찌개 따위가 요란스럽게 끓다</li>
+                    <li class="clue-item">조<font>O</font> 시대 이두 문서 한자 어구 표기 책</li>
+                    <li class="clue-item">아<font>O</font>아 동쪽 끝에 있는 입헌 군주국</li>
+                    <li class="clue-item">맡<font>O</font>보던 일자리를 그만두고 물러남</li>
+                </ul>
+            </div>
+            
+            <div class="clue-group">
+                <h2>Down (Movable)</h2>
+                <ul id="down-list" class="sortable-list">
+                    <li class="clue-item">멕시코의 매운 고추 요리</li>
+                    <li class="clue-item">머리에 다섯 쌍의 다리가 있는 연체동물</li>
+                    <li class="clue-item">모래 같은 식감의 과일이라는 뜻의 이름</li>
+                    <li class="clue-item">소 살코기를 가늘게 썰어 날로 먹는 음식</li>
+                    <li class="clue-item">주식과 부식을 한 그릇에 담은 간편식</li>
+                    <li class="clue-item">운동 시 마시기 적합하게 만든 기능성 음료</li>
+                    <li class="clue-item">얼룩무늬가 있는 고등어과 바닷물고기</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-deco">LABYRINTH HOTEL PANTRY SERVICE</div>
+
+    <script>
+        // 보안 스크립트
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) return false;
+            if(e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0))) return false;
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false;
+        };
+
+        const gridData = [
+            ["이", "문", "대", "사", "의", "일", "본"],
+            ["온", "숫", "자", "과", "를", "품", "제"],
+            ["음", "삼", "제", "동", "맹", "요", "외"],
+            ["료", "치", "오", "글", "거", "리", "다"],
+            ["하", "고", "징", "육", "자", "배", "기"],
+            ["글", "자", "어", "회", "칠", "수", "피"],
+            ["수", "를", "세", "어", "리", "보", "라"]
+        ];
+
+        const gridContainer = document.getElementById('grid');
+        let isDragging = false;
+        let startPos = null;
+        let currentPath = [];
+
+        gridData.flat().forEach((char, i) => {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.textContent = char;
+            cell.dataset.r = Math.floor(i / 7);
+            cell.dataset.c = i % 7;
+
+            cell.onmousedown = (e) => startAction(+cell.dataset.r, +cell.dataset.c);
+            cell.onmouseenter = () => { if (isDragging) updatePath({ r: +cell.dataset.r, c: +cell.dataset.c }); };
+            gridContainer.appendChild(cell);
+        });
+
+        function startAction(r, c) {
+            isDragging = true;
+            startPos = { r, c };
+            updatePath(startPos);
+        }
+
+        // 터치 인터랙션
+        gridContainer.addEventListener('touchstart', (e) => {
+            const touch = e.touches[0];
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (el && el.classList.contains('cell')) {
+                startAction(+el.dataset.r, +el.dataset.c);
+                e.preventDefault();
+            }
+        }, {passive: false});
+
+        gridContainer.addEventListener('touchmove', (e) => {
+            if (!isDragging) return;
+            const touch = e.touches[0];
+            const el = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (el && el.classList.contains('cell')) {
+                updatePath({ r: +el.dataset.r, c: +el.dataset.c });
+            }
+            e.preventDefault();
+        }, {passive: false});
+
+        window.onmouseup = window.ontouchend = () => {
+            if (isDragging) {
+                currentPath.forEach(el => el.classList.toggle('highlighted'));
+                clearPreview();
+                isDragging = false;
+                startPos = null;
+            }
+        };
+
+        function updatePath(endPos) {
+            clearPreview();
+            currentPath = [];
+            const cells = document.querySelectorAll('.cell');
+            const rd = Math.abs(endPos.r - startPos.r);
+            const cd = Math.abs(endPos.c - startPos.c);
+
+            cells.forEach(cell => {
+                const r = +cell.dataset.r;
+                const c = +cell.dataset.c;
+                let inPath = false;
+                if (cd >= rd) {
+                    if (r === startPos.r && c >= Math.min(startPos.c, endPos.c) && c <= Math.max(startPos.c, endPos.c)) inPath = true;
+                } else {
+                    if (c === startPos.c && r >= Math.min(startPos.r, endPos.r) && r <= Math.max(startPos.r, endPos.r)) inPath = true;
+                }
+                if (inPath) {
+                    cell.classList.add('preview');
+                    currentPath.push(cell);
+                }
+            });
+        }
+
+        function clearPreview() {
+            document.querySelectorAll('.cell').forEach(c => c.classList.remove('preview'));
+        }
+
+        new Sortable(document.getElementById('across-list'), { animation: 150, ghostClass: 'sortable-ghost', delay: 100, delayOnTouchOnly: true });
+        new Sortable(document.getElementById('down-list'), { animation: 150, ghostClass: 'sortable-ghost', delay: 100, delayOnTouchOnly: true });
+    </script>
+</body>
+</html>
