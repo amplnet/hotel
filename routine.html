@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Labyrinth Hotel | Routine Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Nanum+Myeongjo:wght@400;700&family=Noto+Serif+KR:wght@300;600&family=Space+Mono&family=Cormorant+Garamond:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+    <script>
+        // 1. 보안 설정
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', function(e) {
+            if (e.key === "F12" || (e.ctrlKey && ['u', 's', 'i', 'j'].includes(e.key.toLowerCase()))) {
+                e.preventDefault();
+            }
+        });
+    </script>
+    <style>
+        /* [1. 기본 설정] */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* PC에서만 커서 보이기 */
+        @media (min-width: 1024px) {
+            * { cursor: none; }
+            .cursor { position: fixed; width: 8px; height: 8px; background: #8B0000; border-radius: 50%; pointer-events: none; z-index: 9999; }
+            .cursor-follower { position: fixed; width: 40px; height: 40px; border: 1px solid rgba(139, 0, 0, 0.5); border-radius: 50%; pointer-events: none; transition: transform 0.1s; z-index: 9998; }
+        }
+        
+        /* 모바일에서 커서 숨기기 */
+        @media (max-width: 1023px) {
+            .cursor, .cursor-follower { display: none; }
+            * { cursor: auto; }
+        }
+
+        body { 
+            background-color: #050505; color: #d4af37; 
+            font-family: 'Nanum Myeongjo', serif; 
+            min-height: 100vh; display: flex; justify-content: center; align-items: center;
+            padding: 20px; overflow-x: hidden;
+        }
+
+        /* [2. 메인 컨테이너] */
+        .routine-container {
+            width: 100%; max-width: 900px;
+            padding: 40px 20px; background: #0a0a0a;
+            border: 2px solid #1a1510;
+            outline: 1px solid #2a1f10; outline-offset: -10px;
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+            text-align: center;
+        }
+
+        .title {
+            font-family: 'Cinzel', serif; font-size: 2.5rem; /* 모바일 대응 크기 축소 */
+            letter-spacing: 8px; color: #d4af37; margin-bottom: 30px;
+            text-shadow: 0 0 25px rgba(212, 175, 55, 0.3);
+            word-break: break-all;
+        }
+
+        /* [3. 달력 그리드] */
+        .calendar-grid {
+            display: grid; grid-template-columns: repeat(7, 1fr);
+            border: 1px solid #1a1510;
+            width: 100%;
+        }
+
+        .cell {
+            aspect-ratio: 1 / 1; display: flex; justify-content: center; align-items: center;
+            border: 1px solid #1a1510; 
+            position: relative; overflow: visible;
+            background: #0d0d0d;
+            transition: all 0.3s ease;
+            -webkit-user-select: none; user-select: none;
+        }
+
+        .header { 
+            background: #111; font-weight: bold; font-size: 0.7rem; /* 요일 글자 축소 */
+            color: #554433; border-bottom: 2px solid #1a1510; 
+            font-family: 'Cinzel', serif;
+            letter-spacing: 1px;
+        }
+
+        .date-val { 
+            font-size: 1.2rem; /* 모바일 가독성 최적화 */
+            font-family: 'Cinzel', serif;
+            transition: all 0.4s ease;
+            z-index: 2;
+            opacity: 0.6;
+        }
+        
+        .reveal-num {
+            position: absolute; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-family: 'Cinzel', serif; 
+            font-size: 1.5rem;
+            font-weight: 700;
+            opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        /* [4. 마커 및 활성화 상태] */
+        .marked::before {
+            content: ''; position: absolute; 
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80%; height: 80%;
+            border: 2px solid rgba(139, 0, 0, 0.4);
+            border-radius: 48% 52% 55% 45% / 45% 55% 42% 58%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .cell.active {
+            background: radial-gradient(circle, #3a0000 0%, #0a0a0a 100%);
+            border-color: #8b0000;
+        }
+
+        .cell.active .date-val { opacity: 0; transform: scale(0.5); }
+        .cell.active .reveal-num { 
+            opacity: 1; transform: translate(-50%, -50%) scale(1);
+            color: #ff3333; text-shadow: 0 0 15px #ff0000;
+        }
+
+        .cell.active::before {
+            border-color: #ff0000;
+            border-width: 3px;
+            width: 85%; height: 85%;
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.4);
+            opacity: 1;
+        }
+
+        /* [5. 미디어 쿼리 - 태블릿/모바일 상세 조절] */
+        @media (max-width: 600px) {
+            .title { font-size: 1.8rem; letter-spacing: 4px; }
+            .header { font-size: 0.5rem; }
+            .date-val { font-size: 1rem; }
+            .reveal-num { font-size: 1.2rem; }
+            .routine-container { padding: 30px 10px; outline-offset: -8px; }
+        }
+
+        .vignette { position: fixed; top: 0; left: 0; width: 100%; height: 100%; box-shadow: inset 0 0 150px #000; pointer-events: none; z-index: 1000; }
+    </style>
+</head>
+<body oncontextmenu="return false" onselectstart="return false">
+
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
+    <div class="vignette"></div>
+
+    <div class="routine-container">
+        <h1 class="title">ROUTINE</h1>
+
+        <div class="calendar-grid">
+            <div class="cell header">MON</div><div class="cell header">TUE</div><div class="cell header">WED</div><div class="cell header">THU</div><div class="cell header">FRI</div><div class="cell header">SAT</div><div class="cell header">SUN</div>
+
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            <div class="cell"><span class="date-val">1</span></div><div class="cell"><span class="date-val">2</span></div>
+            
+            <div class="cell"><span class="date-val">3</span></div><div class="cell"><span class="date-val">4</span></div><div class="cell"><span class="date-val">5</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">6</span><span class="reveal-num">1</span></div>
+            <div class="cell"><span class="date-val">7</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">8</span><span class="reveal-num">3</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">9</span><span class="reveal-num">2</span></div>
+            
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">10</span><span class="reveal-num">3</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">11</span><span class="reveal-num">4</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">12</span><span class="reveal-num">2</span></div>
+            <div class="cell"><span class="date-val">13</span></div><div class="cell"><span class="date-val">14</span></div><div class="cell"><span class="date-val">15</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">16</span><span class="reveal-num">1</span></div>
+            
+            <div class="cell"><span class="date-val">17</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">18</span><span class="reveal-num">2</span></div>
+            <div class="cell"><span class="date-val">19</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">20</span><span class="reveal-num">3</span></div>
+            <div class="cell"><span class="date-val">21</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">22</span><span class="reveal-num">1</span></div>
+            <div class="cell marked" onclick="toggleCell(this)"><span class="date-val">23</span><span class="reveal-num">4</span></div>
+            
+            <div class="cell"><span class="date-val">24</span></div><div class="cell"><span class="date-val">25</span></div><div class="cell"><span class="date-val">26</span></div><div class="cell"><span class="date-val">27</span></div><div class="cell"><span class="date-val">28</span></div><div class="cell"></div><div class="cell"></div>
+        </div>
+    </div>
+
+    <script>
+        // PC 전용 커서 이동 로직
+        const cursor = document.querySelector('.cursor');
+        const follower = document.querySelector('.cursor-follower');
+
+        if (window.matchMedia("(min-width: 1024px)").matches) {
+            document.addEventListener('mousemove', e => {
+                cursor.style.left = e.clientX + 'px';
+                cursor.style.top = e.clientY + 'px';
+                setTimeout(() => {
+                    follower.style.left = e.clientX - 20 + 'px';
+                    follower.style.top = e.clientY - 20 + 'px';
+                }, 50);
+            });
+        }
+
+        function toggleCell(elem) {
+            elem.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
