@@ -42,6 +42,19 @@
             width: 100%; 
             gap: 10px;
         }
+                /* 타입 A: 그림이 있는 계단 (레드 테마) */
+        .step.has-img.active {
+            border-color: #8b0000;
+            background: linear-gradient(to right, #2a0505, #111);
+            box-shadow: 0 0 25px rgba(139, 0, 0, 0.7);
+        }
+
+        /* 타입 B: 화살표로 연결된 계단 (골드 테마) */
+        .step.is-pair.active {
+            border-color: #d4af37;
+            background: linear-gradient(to right, #2a2205, #111);
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+        }
 
         /* [계단 스타일] */
         .step {
