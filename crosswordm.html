@@ -14,196 +14,170 @@
         });
     </script>
     <style>
-        :root {
-            /* === LUXURY SILVER PALETTE === */
-            /* 배경 및 기본 톤 */
-            --bg-deep: #121212;         /* 가장 깊은 배경색 */
-            --silver-shadow: #2a2a2a;   /* 어두운 금속 그림자 */
-            --silver-mid: #666666;      /* 중간 금속톤 */
-            --silver-highlight: #a0a0a0;/* 밝은 금속 하이라이트 */
-            --chrome-bright: #e0e0e0;   /* 크롬 광택 */
+    :root {
+        /* === LUXURY BRIGHT SILVER PALETTE === */
+        --bg-deep: #050505;
+        --silver-shadow: #3a3a3a;    /* 조금 더 밝아진 금속 그림자 */
+        --silver-mid: #999999;       /* 표준 실버 */
+        --silver-light: #cccccc;     /* 밝은 실버 */
+        --chrome-bright: #ffffff;    /* 화이트 크롬 광택 */
 
-            /* 셀(Cell) 디자인 */
-            --cell-inactive: #1a1a1a;   /* 비활성 셀 (어둡고 들어간 느낌) */
-            --cell-active-bg: linear-gradient(145deg, #6a6a6a, #999999); /* 활성 셀 (돌출된 금속 버튼 느낌) */
-            --cell-revealed-bg: linear-gradient(145deg, #ffffff, #c0c0c0); /* 정답 셀 (밝게 빛나는 느낌) */
-            
-            /* 텍스트 색상 */
-            --text-muted: #DDDDDD;      /* 인덱스 번호 등 */
-            --text-bright: #d0d0d0;     /* 기본 밝은 텍스트 */
-            --text-revealed: #000000;   /* 정답 텍스트 (검정) */
-            
-            /* 기타 */
-            --highlight-pink: rgba(255, 100, 120, 0.4); /* 특수 강조 (핑크빛 광택) */
-            --cell-size: 38px;          /* 모바일 터치 최적화 크기 */
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: #050505; }
-
-        body {
-            /* 깊이감 있는 방사형 다크 메탈 배경 */
-            background: radial-gradient(circle at center, #2a2a2a 0%, #000000 100%);
-            color: var(--text-bright);
-            font-family: 'Noto Serif KR', serif;
-            margin: 0; padding: 0;
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh;
-        }
-
-        header {
-            width: 100%;
-            padding: 30px 20px;
-            text-align: center;
-            /* 헤더 하단에 금속 바 느낌 */
-            border-bottom: 3px solid #333;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            background: linear-gradient(to bottom, #222, #111);
-        }
-
-        h1 {
-            font-family: 'Cinzel', serif;
-            font-size: 1.8rem;
-            letter-spacing: 8px;
-            margin: 0;
-            /* 금속성 텍스트 질감 표현 */
-            background: linear-gradient(to bottom, var(--chrome-bright), var(--silver-mid));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: #DDDDDD;
-            filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.8));
-        }
-
-        /* 그리드 뷰포트 */
-        .grid-viewport {
-            width: 100%;
-            overflow-x: auto;
-            padding: 40px 15px;
-            display: flex;
-            justify-content: flex-start; /* 모바일 왼쪽 정렬 */
-            /* 뷰포트 안쪽에 깊이감 있는 그림자 */
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.8);
-            background: rgba(0,0,0,0.3);
-            -webkit-overflow-scrolling: touch;
-        }
-        .grid-viewport::-webkit-scrollbar { height: 5px; }
-        .grid-viewport::-webkit-scrollbar-thumb { background: var(--silver-mid); border-radius: 3px; }
-
-        /* 그리드 프레임 (묵직한 금속 테두리) */
-        .grid-frame {
-            display: grid;
-            grid-template-columns: repeat(25, var(--cell-size));
-            grid-template-rows: repeat(20, var(--cell-size));
-            gap: 2px; /* 셀 간격 */
-            padding: 8px;
-            /* 복합적인 그림자로 두꺼운 금속 베젤 표현 */
-            background: var(--silver-shadow);
-            border: 3px solid #444;
-            box-shadow: 
-                inset 0 0 15px rgba(0,0,0,0.9), /* 내부 깊이 */
-                0 10px 25px rgba(0,0,0,0.7),   /* 외부 그림자 */
-                0 0 0 1px #555;                /* 날카로운 엣지 */
-            flex-shrink: 0;
-            border-radius: 4px;
-        }
-
-        /* 셀 기본 디자인 (비활성 상태 - 어둡고 들어간 느낌) */
-        .cell {
-            width: var(--cell-size); height: var(--cell-size);
-            background-color: var(--cell-inactive);
-            display: flex; align-items: center; justify-content: center;
-            position: relative;
-            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8); /* 안으로 패인 느낌 */
-            border-radius: 2px;
-        }
-
-        /* 활성 셀 디자인 (입력 가능 - 밝게 돌출된 금속 버튼) */
-        .cell.active {
-            background: var(--cell-active-bg);
-            cursor: pointer;
-            /* 돌출된 입체감 */
-            box-shadow: 
-                inset 1px 1px 1px rgba(255,255,255,0.2), /* 상단 하이라이트 */
-                inset -1px -1px 2px rgba(0,0,0,0.5),     /* 하단 그림자 */
-                1px 1px 2px rgba(0,0,0,0.3);             /* 외부 그림자 */
-            transition: all 0.2s ease;
-        }
-        .cell.active:active { /* 터치 시 눌리는 느낌 */
-            box-shadow: inset 2px 2px 4px rgba(0,0,0,0.6);
-            transform: translateY(1px);
-        }
-
-        /* 정답 공개 셀 (가장 밝게 빛남) */
-        .cell.revealed {
-            background: var(--cell-revealed-bg) !important;
-            box-shadow: 0 0 10px rgba(255,255,255,0.2); /* 밝은 빛 번짐 */
-        }
-
-        /* 하이라이트 셀 (핑크빛 광택) */
-        .cell.special-highlight {
-            box-shadow: 
-                inset 0 0 0 2px var(--highlight-pink),
-                0 0 10px var(--highlight-pink) !important;
-        }
-
-        /* 텍스트 디자인 */
-        .index {
-            position: absolute; top: 2px; left: 3px;
-            font-size: 1.2rem; color: var(--text-muted); font-weight: normal;
-            text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
-        }
-
-        .letter {
-            font-family: 'Space Mono', monospace;
-            font-size: 1.2rem; font-weight: bold;
-            display: none;
-            /* 글자에 금속성 광택 */
-            background: linear-gradient(to bottom, #333, #000);
-            -webkit-background-clip: text; -webkit-text-fill-color: #050505;
-        }
-        .cell.revealed .letter { display: block; }
-
-        /* 컨트롤 및 단서 영역 */
-        .control-panel { margin: 30px 0 20px; width: 100%; text-align: center; }
+        /* 셀(Cell) 디자인 개선 */
+        --cell-inactive: #222222;    /* 비활성 셀: 깊이감 있는 짙은 메탈 */
+        /* 활성 셀: 모바일에서도 확실히 은색으로 보이는 밝은 그라데이션 */
+        --cell-active-bg: linear-gradient(135deg, #a0a0a0 0%, #e0e0e0 50%, #a0a0a0 100%);
+        --cell-revealed-bg: linear-gradient(145deg, #ffffff, #d1d1d1); 
         
-        .hotel-btn {
-            background: linear-gradient(to bottom, #4a4a4a, #2a2a2a);
-            color: var(--chrome-bright);
-            border: 1px solid #666;
-            padding: 15px 30px;
-            font-family: 'Cinzel', serif; font-size: 0.85rem;
-            cursor: pointer; letter-spacing: 3px;
-            width: 85%; max-width: 350px;
-            box-shadow: 0 5px 10px rgba(0,0,0,0.5);
-            border-radius: 4px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-        }
+        /* 텍스트 색상 */
+        --text-muted: #666666;       /* 인덱스 번호: 금속 각인 느낌 */
+        --text-bright: #e0e0e0;      
+        --text-revealed: #000000;    
+        
+        --highlight-pink: rgba(255, 100, 120, 0.5); 
+        --cell-size: 38px;           
+    }
 
-        .clues-wrapper {
-            width: 95%; max-width: 600px;
-            margin: 0 0 60px 0;
-            background: linear-gradient(145deg, #1a1a1a, #222);
-            border: 2px solid #333;
-            padding: 30px;
-            box-shadow: inset 0 0 30px rgba(0,0,0,0.5);
-            border-radius: 4px;
-        }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
-        .clue-group h2 { 
-            font-family: 'Cinzel', serif; 
-            border-bottom: 2px solid var(--silver-mid);
-            font-size: 1.3rem; margin-top: 0;
-            color: var(--silver-highlight);
-            padding-bottom: 8px; letter-spacing: 2px;
-        }
-        .clue-item { 
-            margin: 15px 0; font-size: 0.95rem; 
-            color: var(--text-bright); line-height: 1.6; 
-            word-break: keep-all;
-        }
+    body {
+        background: radial-gradient(circle at center, #333333 0%, #050505 100%);
+        color: var(--text-bright);
+        font-family: 'Noto Serif KR', serif;
+        margin: 0; padding: 0;
+        display: flex; flex-direction: column; align-items: center;
+        min-height: 100vh;
+    }
 
-        @media (min-width: 1024px) {
-            .grid-viewport { justify-content: center; }
-        }
-    </style>
+    header {
+        width: 100%;
+        padding: 30px 20px;
+        text-align: center;
+        border-bottom: 2px solid #555;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+        background: linear-gradient(to bottom, #2a2a2a, #111);
+    }
+
+    h1 {
+        font-family: 'Cinzel', serif;
+        font-size: 1.8rem;
+        letter-spacing: 8px;
+        margin: 0;
+        background: linear-gradient(to bottom, #ffffff, #888888);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.8));
+    }
+
+    .grid-viewport {
+        width: 100%;
+        overflow-x: auto;
+        padding: 40px 15px;
+        display: flex;
+        justify-content: flex-start;
+        box-shadow: inset 0 0 40px rgba(0,0,0,1);
+        background: #0a0a0a;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* 그리드 프레임: 실버 베젤 느낌 강화 */
+    .grid-frame {
+        display: grid;
+        grid-template-columns: repeat(25, var(--cell-size));
+        grid-template-rows: repeat(20, var(--cell-size));
+        gap: 1.5px;
+        padding: 10px;
+        background: #444; /* 경계선 역할 */
+        border: 4px solid #222;
+        box-shadow: 
+            0 15px 35px rgba(0,0,0,0.8),
+            inset 0 0 10px rgba(0,0,0,0.5);
+        flex-shrink: 0;
+        border-radius: 4px;
+    }
+
+    /* 비활성 셀: 모바일에서 검은 배경과 구분되도록 테두리와 질감 추가 */
+    .cell {
+        width: var(--cell-size); height: var(--cell-size);
+        background-color: var(--cell-inactive);
+        display: flex; align-items: center; justify-content: center;
+        position: relative;
+        box-shadow: inset 1px 1px 3px rgba(0,0,0,0.9);
+        border: 0.5px solid #333; /* 칸 구분을 위한 미세한 선 */
+    }
+
+    /* 활성 셀: 확실한 실버 금속판 느낌 */
+    .cell.active {
+        background: var(--cell-active-bg);
+        cursor: pointer;
+        border: 0.5px solid #fff; /* 하이라이트 엣지 */
+        box-shadow: 
+            0 2px 4px rgba(0,0,0,0.5),
+            inset 1px 1px 0px rgba(255,255,255,0.4);
+    }
+
+    .cell.revealed {
+        background: var(--cell-revealed-bg) !important;
+        box-shadow: 0 0 15px rgba(255,255,255,0.4);
+    }
+
+    .cell.special-highlight {
+        box-shadow: inset 0 0 0 2px var(--highlight-pink), 0 0 15px var(--highlight-pink) !important;
+    }
+
+    /* 인덱스 숫자 가독성 향상 */
+    .index {
+        position: absolute; top: 1px; left: 2px;
+        font-size: 1.2rem; 
+        color: var(--text-muted); 
+        font-weight: 700;
+        z-index: 2;
+    }
+    .cell.active .index { color: #444; } /* 밝은 판 위에서는 어둡게 */
+
+    .letter {
+        font-family: 'Space Mono', monospace;
+        font-size: 1.3rem; font-weight: bold;
+        display: none;
+        color: var(--text-revealed);
+    }
+    .cell.revealed .letter { display: block; }
+
+    /* 버튼 및 단서창 실버 디자인 통일 */
+    .control-panel { margin: 30px 0 20px; width: 100%; text-align: center; }
+    .hotel-btn {
+        background: linear-gradient(to bottom, #888, #333);
+        color: #eee;
+        border: 1px solid #aaa;
+        padding: 15px 30px;
+        font-family: 'Cinzel', serif; font-size: 0.85rem;
+        cursor: pointer; letter-spacing: 3px;
+        width: 85%; max-width: 350px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        border-radius: 2px;
+        text-transform: uppercase;
+    }
+
+    .clues-wrapper {
+        width: 95%; max-width: 600px;
+        margin: 0 0 60px 0;
+        background: #151515;
+        border: 1px solid #444;
+        padding: 25px;
+        box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+    }
+
+    .clue-group h2 { 
+        font-family: 'Cinzel', serif; 
+        border-bottom: 1px solid var(--silver-mid);
+        font-size: 1.2rem; color: var(--silver-light);
+        padding-bottom: 5px; letter-spacing: 2px;
+    }
+    .clue-item { margin: 15px 0; font-size: 0.95rem; color: #bbb; line-height: 1.6; }
+
+    @media (min-width: 1024px) {
+        .grid-viewport { justify-content: center; }
+    }
+</style>
 </head>
 <body>
 
