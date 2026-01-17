@@ -173,6 +173,9 @@
     </div>
 
     <script>
+          if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
+    window.location.href = "https://amplnet.github.io/hotel/flightm.html";
+}
         /* [보안 설정] */
         document.onkeydown = function(e) {
             if(event.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73) || (e.ctrlKey && e.keyCode == 85)) return false;
@@ -212,9 +215,7 @@
 
         // 초기 안내 메시지 표시
         window.onload = () => document.getElementById('display-content').classList.add('show');
-                if (/Mobi|Android|iPhone/i.test(navigator.userAgent)) {
-    window.location.href = "https://amplnet.github.io/hotel/flightm.html";
-}
+
     </script>
 </body>
 </html>
