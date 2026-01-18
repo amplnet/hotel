@@ -228,19 +228,19 @@
         let currentRotation = 0;
 
         const schedule = [
-            { start: "01-01", angle: 315 }, { start: "01-05", angle: 330 },
-            { start: "01-20", angle: 345 }, { start: "02-04", angle: 0 },
-            { start: "02-19", angle: 15 },  { start: "03-05", angle: 30 },
-            { start: "03-20", angle: 45 },  { start: "04-05", angle: 60 },
-            { start: "04-20", angle: 75 },  { start: "05-05", angle: 90 },
-            { start: "05-21", angle: 105 }, { start: "06-06", angle: 120 },
-            { start: "06-21", angle: 135 }, { start: "07-07", angle: 150 },
-            { start: "07-22", angle: 165 }, { start: "08-07", angle: 180 },
-            { start: "08-23", angle: 195 }, { start: "09-07", angle: 210 },
-            { start: "09-23", angle: 225 }, { start: "10-08", angle: 240 },
-            { start: "10-23", angle: 255 }, { start: "11-07", angle: 270 },
-            { start: "11-22", angle: 285 }, { start: "12-07", angle: 300 },
-            { start: "12-22", angle: 315 },
+            { start: "01-01", angle: 45 }, { start: "01-05", angle: 30 },
+            { start: "01-20", angle: 15 }, { start: "02-04", angle: 0 },
+            { start: "02-19", angle: 345 },  { start: "03-05", angle: 330 },
+            { start: "03-20", angle: 315 },  { start: "04-05", angle: 300 },
+            { start: "04-20", angle: 285 },  { start: "05-05", angle: 270 },
+            { start: "05-21", angle: 265 }, { start: "06-06", angle: 240 },
+            { start: "06-21", angle: 235 }, { start: "07-07", angle: 210 },
+            { start: "07-22", angle: 205 }, { start: "08-07", angle: 180 },
+            { start: "08-23", angle: 175 }, { start: "09-07", angle: 150 },
+            { start: "09-23", angle: 145 }, { start: "10-08", angle: 120 },
+            { start: "10-23", angle: 115 }, { start: "11-07", angle: 90 },
+            { start: "11-22", angle: 75 }, { start: "12-07", angle: 60 },
+            { start: "12-22", angle: 45 },
         ];
 
         window.onload = () => {
@@ -265,7 +265,7 @@
         }
 
         function manualRotate() {
-            currentRotation += 15;
+            currentRotation -= 15;
             rotateGroup.style.transform = `rotate(${currentRotation}deg)`;
             dateDisplay.textContent = `MANUAL OVERRIDE // ANGLE: ${currentRotation % 360}°`;
         }
