@@ -6,10 +6,9 @@
     <title>Labyrinth Hotel - Pantry Suite</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,600;1,500&family=Noto+Serif+KR:wght@300;600&family=Space+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
-        <script>
+    <script>
         (function() {
             if (/Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
-                // 뒤로가기 시 무한루프 방지를 위해 replace 사용 권장
                 window.location.replace("https://amplnet.github.io/hotel/pantrym.html");
             }
         })();
@@ -18,13 +17,13 @@
         /* == SILVER LUXURY PALETTE == */
         :root {
             --bg-dark: #eeeeee;
-            --silver-dark: #5a5550;    /* 묵직한 다크 실버 */
-            --silver-mid: #8c8883;     /* 중간 톤 금속 */
-            --silver-light: #b8b4b0;   /* 하이라이트 실버 */
-            --metal-frame: #2a2725;    /* 금속 프레임 테두리 */
-            --text-muted: #999590;     /* 차분한 텍스트 */
-            --grid-bg: #11100f;        /* 셀 배경 */
-            --preview-bg: rgba(184, 180, 176, 0.15); /* 드래그 미리보기 */
+            --silver-dark: #5a5550;
+            --silver-mid: #8c8883;
+            --silver-light: #b8b4b0;
+            --metal-frame: #2a2725;
+            --text-muted: #999590;
+            --grid-bg: #11100f;
+            --preview-bg: rgba(184, 180, 176, 0.15);
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -43,7 +42,6 @@
             overflow-x: hidden;
         }
 
-        /* 헤더: 실버 그라데이션 적용 */
         header {
             text-align: center;
             margin-bottom: 40px;
@@ -66,7 +64,6 @@
             filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
         }
 
-        /* 메인 컨테이너: 모바일 수직 배치 */
         .main-container {
             display: flex;
             flex-direction: column;
@@ -76,7 +73,6 @@
             align-items: center;
         }
 
-        /* === 실버 그리드 섹션 === */
         .crossword-section {
             width: 100%;
             display: flex;
@@ -102,7 +98,7 @@
             justify-content: center;
             font-size: 1.2rem;
             font-family: 'Noto Serif KR', serif;
-            color: #444; /* 미선택 글자 */
+            color: #444;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
@@ -114,7 +110,6 @@
             color: var(--silver-light);
         }
 
-        /* 금속 질감 하이라이트 */
         .cell.highlighted {
             background: linear-gradient(145deg, var(--silver-dark), var(--silver-mid));
             color: #050505;
@@ -123,7 +118,6 @@
             text-shadow: 0 1px 1px rgba(255,255,255,0.2);
         }
 
-        /* === 힌트 리스트 섹션 === */
         .clues-section {
             width: 100%;
             display: flex;
@@ -146,6 +140,7 @@
             padding: 0;
             margin: 0;
             list-style: none;
+            min-height: 50px; /* 드래그 타겟 영역 확보 */
         }
 
         .clue-item {
@@ -155,9 +150,14 @@
             border-left: 2px solid var(--silver-dark);
             font-size: 0.95rem;
             color: var(--text-muted);
-            cursor: grab;
+            cursor: grab; /* 드래그 가능 아이콘 */
             line-height: 1.6;
             transition: all 0.3s;
+            touch-action: none; /* 모바일 드래그 충돌 방지 */
+        }
+
+        .clue-item:active {
+            cursor: grabbing;
         }
 
         .clue-item:hover {
@@ -179,7 +179,6 @@
             border: 1px dashed var(--silver-light);
         }
 
-        /* 하단 장식 */
         .footer-deco {
             margin-top: 60px;
             font-family: 'Cinzel', serif;
@@ -189,7 +188,6 @@
             opacity: 0.6;
         }
 
-        /* 데스크탑 최적화 (가로 배치) */
         @media (min-width: 1024px) {
             .main-container { flex-direction: row; max-width: 1100px; align-items: flex-start; }
             .crossword-section { flex: 1; }
@@ -198,7 +196,7 @@
         }
     </style>
 </head>
-<body oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
+<body oncontextmenu="return false" onselectstart="return false">
 
     <header>
         <h1>Pantry</h1>
@@ -241,7 +239,7 @@
     <div class="footer-deco">LABYRINTH HOTEL PANTRY SERVICE</div>
 
     <script>
-        // [1] 보안 및 우클릭 금지
+        // [1] 보안 설정 (필요한 경우에만 유지)
         document.onkeydown = function(e) {
             if(e.keyCode == 123) return false;
             if(e.ctrlKey && e.shiftKey && (e.keyCode == 'I'.charCodeAt(0) || e.keyCode == 'J'.charCodeAt(0) || e.keyCode == 'C'.charCodeAt(0))) return false;
@@ -260,7 +258,7 @@
         ];
 
         const gridContainer = document.getElementById('grid');
-        let isDragging = false;
+        let isDraggingGrid = false;
         let startPos = null;
         let currentPath = [];
 
@@ -271,19 +269,21 @@
             cell.dataset.r = Math.floor(i / 7);
             cell.dataset.c = i % 7;
 
-            // 마우스 이벤트
-            cell.onmousedown = (e) => startSelect(+cell.dataset.r, +cell.dataset.c);
-            cell.onmouseenter = () => { if (isDragging) updatePath({ r: +cell.dataset.r, c: +cell.dataset.c }); };
+            cell.onmousedown = (e) => {
+                // 그리드 선택 드래그 시작
+                startSelect(+cell.dataset.r, +cell.dataset.c);
+            };
+            cell.onmouseenter = () => { if (isDraggingGrid) updatePath({ r: +cell.dataset.r, c: +cell.dataset.c }); };
             gridContainer.appendChild(cell);
         });
 
         function startSelect(r, c) {
-            isDragging = true;
+            isDraggingGrid = true;
             startPos = { r, c };
             updatePath(startPos);
         }
 
-        // [3] 터치 인터랙션 (모바일 핵심)
+        // [3] 그리드 터치 인터랙션
         gridContainer.addEventListener('touchstart', (e) => {
             const touch = e.touches[0];
             const el = document.elementFromPoint(touch.clientX, touch.clientY);
@@ -294,7 +294,7 @@
         }, {passive: false});
 
         gridContainer.addEventListener('touchmove', (e) => {
-            if (!isDragging) return;
+            if (!isDraggingGrid) return;
             const touch = e.touches[0];
             const el = document.elementFromPoint(touch.clientX, touch.clientY);
             if (el && el.classList.contains('cell')) {
@@ -304,10 +304,10 @@
         }, {passive: false});
 
         window.onmouseup = window.ontouchend = () => {
-            if (isDragging) {
+            if (isDraggingGrid) {
                 currentPath.forEach(el => el.classList.toggle('highlighted'));
                 clearPreview();
-                isDragging = false;
+                isDraggingGrid = false;
                 startPos = null;
             }
         };
@@ -339,9 +339,23 @@
             document.querySelectorAll('.cell').forEach(c => c.classList.remove('preview'));
         }
 
-        // [4] 힌트 드래그 앤 드롭 설정 (모바일 딜레이 포함)
-        new Sortable(document.getElementById('across-list'), { animation: 150, ghostClass: 'sortable-ghost', delay: 100, delayOnTouchOnly: true });
-        new Sortable(document.getElementById('down-list'), { animation: 150, ghostClass: 'sortable-ghost', delay: 100, delayOnTouchOnly: true });
+        // [4] 힌트 리스트 드래그 앤 드롭 (SortableJS 설정)
+        // delay: 150을 주어 모바일에서 터치 스크롤과 드래그가 겹치지 않게 방지했습니다.
+        new Sortable(document.getElementById('across-list'), {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            delay: 150,
+            delayOnTouchOnly: true,
+            forceFallback: true // 보안 설정이 강한 환경에서도 드래그 가능하게 함
+        });
+
+        new Sortable(document.getElementById('down-list'), {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            delay: 150,
+            delayOnTouchOnly: true,
+            forceFallback: true
+        });
     </script>
 </body>
 </html>
