@@ -17,27 +17,25 @@
     :root {
         /* === LUXURY BRIGHT SILVER PALETTE === */
         --bg-deep: #050505;
-        --silver-shadow: #3a3a3a;    /* 조금 더 밝아진 금속 그림자 */
-        --silver-mid: #999999;       /* 표준 실버 */
-        --silver-light: #cccccc;     /* 밝은 실버 */
-        --chrome-bright: #ffffff;    /* 화이트 크롬 광택 */
-
-        /* 셀(Cell) 디자인 개선 */
-        --cell-inactive: #222222;    /* 비활성 셀: 깊이감 있는 짙은 메탈 */
-        /* 활성 셀: 모바일에서도 확실히 은색으로 보이는 밝은 그라데이션 */
+        --silver-shadow: #3a3a3a;
+        --silver-mid: #999999;
+        --silver-light: #cccccc;
+        --chrome-bright: #ffffff;
+        --cell-inactive: #222222;
         --cell-active-bg: linear-gradient(135deg, #a0a0a0 0%, #e0e0e0 50%, #a0a0a0 100%);
         --cell-revealed-bg: linear-gradient(145deg, #ffffff, #d1d1d1); 
-        
-        /* 텍스트 색상 */
-        --text-muted: #666666;       /* 인덱스 번호: 금속 각인 느낌 */
-        --text-bright: #e0e0e0;      
-        --text-revealed: #000000;    
-        
+        --text-muted: #666666;
+        --text-bright: #e0e0e0;
+        --text-revealed: #000000;
         --highlight-pink: rgba(255, 100, 120, 0.5); 
         --cell-size: 38px;           
     }
 
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    /* === 커서 스타일 === */
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; cursor: none; }
+    .cursor { position: fixed; width: 8px; height: 8px; background: #ffffff; border-radius: 50%; pointer-events: none; z-index: 9999; mix-blend-mode: difference; }
+    .cursor-follower { position: fixed; width: 30px; height: 30px; border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 50%; pointer-events: none; transition: transform 0.1s; z-index: 9998; }
+    @media (pointer: coarse) { .cursor, .cursor-follower { display: none; } * { cursor: auto; } }
 
     body {
         background: radial-gradient(circle at center, #333333 0%, #050505 100%);
@@ -46,140 +44,94 @@
         margin: 0; padding: 0;
         display: flex; flex-direction: column; align-items: center;
         min-height: 100vh;
+        overflow-x: hidden;
     }
 
     header {
-        width: 100%;
-        padding: 30px 20px;
-        text-align: center;
-        border-bottom: 2px solid #555;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+        width: 100%; padding: 30px 20px; text-align: center;
+        border-bottom: 2px solid #555; box-shadow: 0 5px 15px rgba(0,0,0,0.6);
         background: linear-gradient(to bottom, #2a2a2a, #111);
     }
 
     h1 {
-        font-family: 'Cinzel', serif;
-        font-size: 1.8rem;
-        letter-spacing: 8px;
-        margin: 0;
+        font-family: 'Cinzel', serif; font-size: 1.8rem; letter-spacing: 8px; margin: 0;
         background: linear-gradient(to bottom, #ffffff, #888888);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         filter: drop-shadow(0px 2px 2px rgba(0,0,0,0.8));
     }
 
     .grid-viewport {
-        width: 100%;
-        overflow-x: auto;
-        padding: 40px 15px;
-        display: flex;
-        justify-content: flex-start;
-        box-shadow: inset 0 0 40px rgba(0,0,0,1);
-        background: #0a0a0a;
+        width: 100%; overflow-x: auto; padding: 40px 15px;
+        display: flex; justify-content: flex-start;
+        box-shadow: inset 0 0 40px rgba(0,0,0,1); background: #0a0a0a;
         -webkit-overflow-scrolling: touch;
     }
 
-    /* 그리드 프레임: 실버 베젤 느낌 강화 */
     .grid-frame {
-        display: grid;
-        grid-template-columns: repeat(25, var(--cell-size));
+        display: grid; grid-template-columns: repeat(25, var(--cell-size));
         grid-template-rows: repeat(20, var(--cell-size));
-        gap: 1.5px;
-        padding: 10px;
-        background: #444; /* 경계선 역할 */
-        border: 4px solid #222;
-        box-shadow: 
-            0 15px 35px rgba(0,0,0,0.8),
-            inset 0 0 10px rgba(0,0,0,0.5);
-        flex-shrink: 0;
-        border-radius: 4px;
+        gap: 1.5px; padding: 10px; background: #444; border: 4px solid #222;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.5);
+        flex-shrink: 0; border-radius: 4px;
     }
 
-    /* 비활성 셀: 모바일에서 검은 배경과 구분되도록 테두리와 질감 추가 */
     .cell {
         width: var(--cell-size); height: var(--cell-size);
         background-color: var(--cell-inactive);
         display: flex; align-items: center; justify-content: center;
-        position: relative;
-        box-shadow: inset 1px 1px 3px rgba(0,0,0,0.9);
-        border: 0.5px solid #333; /* 칸 구분을 위한 미세한 선 */
+        position: relative; box-shadow: inset 1px 1px 3px rgba(0,0,0,0.9);
+        border: 0.5px solid #333;
     }
 
-    /* 활성 셀: 확실한 실버 금속판 느낌 */
     .cell.active {
-        background: var(--cell-active-bg);
-        cursor: pointer;
-        border: 0.5px solid #fff; /* 하이라이트 엣지 */
-        box-shadow: 
-            0 2px 4px rgba(0,0,0,0.5),
-            inset 1px 1px 0px rgba(255,255,255,0.4);
+        background: var(--cell-active-bg); border: 0.5px solid #fff;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.5), inset 1px 1px 0px rgba(255,255,255,0.4);
     }
 
-    .cell.revealed {
-        background: var(--cell-revealed-bg) !important;
-        box-shadow: 0 0 15px rgba(255,255,255,0.4);
-    }
+    .cell.revealed { background: var(--cell-revealed-bg) !important; box-shadow: 0 0 15px rgba(255,255,255,0.4); }
+    .cell.special-highlight { box-shadow: inset 0 0 0 2px var(--highlight-pink), 0 0 15px var(--highlight-pink) !important; }
 
-    .cell.special-highlight {
-        box-shadow: inset 0 0 0 2px var(--highlight-pink), 0 0 15px var(--highlight-pink) !important;
-    }
-
-    /* 인덱스 숫자 가독성 향상 */
     .index {
-        position: absolute; top: 1px; left: 2px;
-        font-size: 1.2rem; 
-        color: var(--text-muted); 
-        font-weight: 700;
-        z-index: 2;
+        position: absolute; top: 1px; left: 2px; font-size: 1rem; 
+        color: var(--text-muted); font-weight: 700; z-index: 2; pointer-events: none;
     }
-    .cell.active .index { color: #444; } /* 밝은 판 위에서는 어둡게 */
+    .cell.active .index { color: #444; }
 
     .letter {
-        font-family: 'Space Mono', monospace;
-        font-size: 1.3rem; font-weight: bold;
-        display: none;
-        color: var(--text-revealed);
+        font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: bold;
+        display: none; color: var(--text-revealed); pointer-events: none;
     }
     .cell.revealed .letter { display: block; }
 
-    /* 버튼 및 단서창 실버 디자인 통일 */
     .control-panel { margin: 30px 0 20px; width: 100%; text-align: center; }
     .hotel-btn {
-        background: linear-gradient(to bottom, #888, #333);
-        color: #eee;
-        border: 1px solid #aaa;
-        padding: 15px 30px;
+        background: linear-gradient(to bottom, #888, #333); color: #eee;
+        border: 1px solid #aaa; padding: 15px 30px;
         font-family: 'Cinzel', serif; font-size: 0.85rem;
-        cursor: pointer; letter-spacing: 3px;
-        width: 85%; max-width: 350px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        border-radius: 2px;
+        letter-spacing: 3px; width: 85%; max-width: 350px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-radius: 2px;
         text-transform: uppercase;
     }
 
     .clues-wrapper {
-        width: 95%; max-width: 600px;
-        margin: 0 0 60px 0;
-        background: #151515;
-        border: 1px solid #444;
-        padding: 25px;
+        width: 95%; max-width: 600px; margin: 0 0 60px 0;
+        background: #151515; border: 1px solid #444; padding: 25px;
         box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
     }
 
     .clue-group h2 { 
-        font-family: 'Cinzel', serif; 
-        border-bottom: 1px solid var(--silver-mid);
-        font-size: 1.2rem; color: var(--silver-light);
-        padding-bottom: 5px; letter-spacing: 2px;
+        font-family: 'Cinzel', serif; border-bottom: 1px solid var(--silver-mid);
+        font-size: 1.2rem; color: var(--silver-light); padding-bottom: 5px; letter-spacing: 2px;
     }
     .clue-item { margin: 15px 0; font-size: 0.95rem; color: #bbb; line-height: 1.6; }
 
-    @media (min-width: 1024px) {
-        .grid-viewport { justify-content: center; }
-    }
+    @media (min-width: 1024px) { .grid-viewport { justify-content: center; } }
 </style>
 </head>
 <body>
+
+    <div class="cursor"></div>
+    <div class="cursor-follower"></div>
 
     <header>
         <h1>Labyrinth Hotel</h1>
@@ -197,27 +149,24 @@
         <div class="clue-group">
             <h2>Across</h2>
             <div class="clue-item">2. </div>
-            <div class="clue-item">3.</div>
-                        <div class="clue-item">4. </div>
+            <div class="clue-item">3. </div>
+            <div class="clue-item">4. </div>
             <div class="clue-item">5. </div>
-            
-                       <div class="clue-item">6. </div>
+            <div class="clue-item">6. </div>
             <div class="clue-item">7. </div>
-            </div>
+        </div>
         <div class="clue-group">
             <h2>Down</h2>
             <div class="clue-item">2. </div>
             <div class="clue-item">3. </div>
-                        <div class="clue-item">4. </div>
+            <div class="clue-item">4. </div>
             <div class="clue-item">5. </div>
-                        <div class="clue-item">6. </div>
+            <div class="clue-item">6. </div>
             <div class="clue-item">7. </div>
-             </div>
+        </div>
     </div>
 
     <script>
-        // --- [기존 스크립트 로직 유지] ---
-        // 데이터 구조는 동일합니다.
         const puzzleWords = [
             { r: 2, c: 0, dir: 'A', id: '2', len: 15 },
             { r: 3, c: 5, dir: 'A', id: '3', len: 9 },
@@ -274,13 +223,26 @@
 
                         cell.onclick = () => {
                             const currentText = letter.textContent;
-                            const input = prompt(`단어를 입력하세요 (길이: ${data.words[0].len}):`, currentText);
+                            
+                            // [우선순위 로직] 숫자가 있는 칸이면 해당 ID의 단어를 먼저 타겟팅
+                            const cellIndex = data.indices.length > 0 ? data.indices[0] : null;
+                            let targetWord = data.words[0];
+                            if (cellIndex) {
+                                const priority = data.words.find(w => w.id === cellIndex);
+                                if (priority) targetWord = priority;
+                            }
+
+                            const promptMsg = `[${targetWord.dir === 'A' ? 'Across' : 'Down'} ${targetWord.id}] 단어를 입력하세요 (길이: ${targetWord.len}):`;
+                            const input = prompt(promptMsg, currentText);
                             if (input === null) return;
                             const upperInput = input.trim().toUpperCase();
-                            if (upperInput === "") { clearWord(data.words[0]); return; }
-                            const targetWord = data.words.find(w => w.len === upperInput.length);
-                            if (targetWord) fillWord(targetWord, upperInput);
-                            else alert(`길이가 맞지 않습니다. (필요 길이: ${data.words[0].len})`);
+                            
+                            if (upperInput === "") { clearWord(targetWord); return; }
+                            
+                            // 입력 길이에 맞는 단어 선을 찾아 입력 (겹침 해결)
+                            const matched = data.words.find(w => w.len === upperInput.length);
+                            if (matched) fillWord(matched, upperInput);
+                            else alert(`길이가 맞지 않습니다. (필요 길이: ${targetWord.len})`);
                         };
                     }
                     gridElement.appendChild(cell);
@@ -320,6 +282,18 @@
                 });
             }
         }
+
+        // --- 커서 이동 로직 ---
+        const cursor = document.querySelector('.cursor');
+        const follower = document.querySelector('.cursor-follower');
+        document.addEventListener('mousemove', e => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+            setTimeout(() => {
+                follower.style.left = (e.clientX - 15) + 'px';
+                follower.style.top = (e.clientY - 15) + 'px';
+            }, 50);
+        });
 
         drawGrid();
     </script>
