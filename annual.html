@@ -261,15 +261,20 @@
             currentRotation = targetAngle;
             rotateGroup.style.transform = `rotate(${currentRotation}deg)`;
             
-            dateDisplay.textContent = `SYSTEM DATE: ${todayStr} // ANGLE: ${targetAngle}°`;
+            dateDisplay.textContent = `SYSTEM DATE: ${todayStr} // ANGLE: ${targetAngle + 285}°`;
         }
 
-        function manualRotate() {
-            currentRotation -= 15;
-            rotateGroup.style.transform = `rotate(${currentRotation}deg)`;
-            dateDisplay.textContent = `MANUAL OVERRIDE // ANGLE: ${currentRotation % 360}°`;
-        }
-
+function manualRotate() {
+    // 1. 물리적 회전: 값을 감소시켜 반시계방향(CCW) 유도
+    currentRotation -= 15; 
+    rotateGroup.style.transform = `rotate(${currentRotation}deg)`;
+    
+    // 2. 표시 각도: 기존 targetAngle 변수를 활용해 15씩 증가 (0~359 범위 순환)
+    targetAngle = (targetAngle + 15) % 360; 
+    
+    // 3. 화면 업데이트
+    dateDisplay.textContent = `MANUAL OVERRIDE // ANGLE: ${targetAngle + 285}°`;
+}
         function initBoard() {
             const nodesLayer = document.getElementById('nodes-layer');
             const linesLayer = document.getElementById('lines-layer');
