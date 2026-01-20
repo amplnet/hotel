@@ -146,24 +146,38 @@
         </div>
     </div>
 
-    <script>
-        /* [커서 추적 스크립트 - 필수] */
+<script>
         const cursor = document.querySelector('.cursor');
         const follower = document.querySelector('.cursor-follower');
 
+        // 커서 표시 함수
+        const showCursor = () => {
+            cursor.style.opacity = "1";
+            follower.style.opacity = "1";
+        };
+
+        // 커서 숨김 함수
+        const hideCursor = () => {
+            cursor.style.opacity = "0";
+            follower.style.opacity = "0";
+        };
+
         document.addEventListener('mousemove', (e) => {
-            // 메인 점 이동
+            showCursor(); // 마우스가 움직이면 커서를 보여줌
             cursor.style.left = e.clientX + 'px';
             cursor.style.top = e.clientY + 'px';
             
-            // 팔로워 원 이동 (약간의 지연 효과)
             setTimeout(() => {
                 follower.style.left = (e.clientX - 20) + 'px';
                 follower.style.top = (e.clientY - 20) + 'px';
             }, 50);
         });
 
-        /* 보안 설정 (우클릭 등 차단은 유지) */
+        // 화면 밖으로 나갈 때와 들어올 때 처리
+        document.addEventListener('mouseleave', hideCursor);
+        document.addEventListener('mouseenter', showCursor);
+
+        /* 보안 설정 */
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.onkeydown = function(e) {
             if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && e.keyCode == 73)) return false;
