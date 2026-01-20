@@ -261,7 +261,7 @@
             currentRotation = targetAngle;
             rotateGroup.style.transform = `rotate(${currentRotation}deg)`;
             
-            dateDisplay.textContent = `SYSTEM DATE: ${todayStr} // ANGLE: ${targetAngle + 285}°`;
+            dateDisplay.textContent = `SYSTEM DATE: ${todayStr} // ANGLE: ${(targetAngle + 285)% 360}°`;
         }
 
 function manualRotate() {
@@ -273,7 +273,7 @@ function manualRotate() {
     targetAngle = (targetAngle + 15) % 360; 
     
     // 3. 화면 업데이트
-    dateDisplay.textContent = `MANUAL OVERRIDE // ANGLE: ${targetAngle + 285}°`;
+    dateDisplay.textContent = `MANUAL OVERRIDE // ANGLE: ${(targetAngle + 285)  % 360}°`;
 }
         function initBoard() {
             const nodesLayer = document.getElementById('nodes-layer');
